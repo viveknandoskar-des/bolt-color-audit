@@ -1,0 +1,2667 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Color Audit — Transactions / All / Active</title>
+<style>
+  :root {
+    --bg: #FAFAFA;
+    --card: #FFFFFF;
+    --border: #E7E6E6;
+    --text: #1D1D1D;
+    --muted: #767676;
+    --match: #439775;
+    --close: #C98B11;
+    --miss: #F74D6B;
+    --hover: #F6F8FC;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.45;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+  .page-header {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    flex-shrink: 0;
+  }
+  h1 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  .subtitle { color: var(--muted); font-size: 12px; }
+  .stats { display: flex; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+  .stat {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .stat strong { font-size: 14px; }
+  .stat-match strong { color: var(--match); }
+  .stat-close strong { color: var(--close); }
+  .stat-miss strong { color: var(--miss); }
+  .controls {
+    display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; align-items: center;
+  }
+  .filter-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 5px 11px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--text);
+    font-family: inherit;
+  }
+  .filter-btn:hover { background: var(--hover); }
+  .filter-btn.active { background: var(--text); color: white; border-color: var(--text); }
+  .search-input, .section-select {
+    padding: 5px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: inherit;
+    outline: none;
+    background: white;
+  }
+  .search-input { min-width: 240px; }
+  .search-input:focus, .section-select:focus { border-color: var(--text); }
+
+  /* Table scroll container takes remaining height */
+  .table-wrapper {
+    flex: 1;
+    overflow: auto;
+    background: var(--card);
+    margin: 16px 24px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+  thead {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+  thead th {
+    background: var(--card);
+    text-align: left;
+    font-weight: 500;
+    color: var(--muted);
+    padding: 10px 12px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border);
+    user-select: none;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  thead th:hover { color: var(--text); }
+  thead th.sorted-asc::after { content: ' ↑'; color: var(--text); font-weight: 600; }
+  thead th.sorted-desc::after { content: ' ↓'; color: var(--text); font-weight: 600; }
+  tbody td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--hover); }
+  td.strong { font-weight: 500; min-width: 220px; }
+  .cell-swatch { width: 36px; text-align: center; padding-left: 6px; padding-right: 6px; }
+  code {
+    font-family: 'SF Mono', Menlo, Monaco, monospace;
+    font-size: 11px;
+    background: rgba(0,0,0,0.04);
+    padding: 1px 5px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .swatch {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border-radius: 5px;
+    border: 1px solid rgba(0,0,0,0.1);
+    vertical-align: middle;
+  }
+  .swatch-empty {
+    background: repeating-linear-gradient(45deg, #fff, #fff 3px, #FEE 3px, #FEE 6px);
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .badge-match { background: rgba(67,151,117,0.12); color: var(--match); }
+  .badge-close { background: rgba(201,139,17,0.12); color: var(--close); }
+  .badge-miss  { background: rgba(247,77,107,0.12); color: var(--miss); }
+  .r-miss td { background: rgba(247,77,107,0.04); }
+  .missing { color: var(--muted); }
+  .muted-small { color: var(--muted); font-size: 11px; max-width: 260px; }
+  tr.hidden { display: none; }
+  .footer {
+    color: var(--muted);
+    font-size: 12px;
+    padding: 8px 24px;
+    border-top: 1px solid var(--border);
+    background: var(--card);
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+<div class="page-header">
+  <h1>Color Audit — Transactions / All / Active</h1>
+  <div class="subtitle">Real UI 2025 Design System token mapping for all colors on the transaction list page</div>
+  <div class="stats">
+    <div class="stat stat-total"><strong>199</strong> total</div>
+    <div class="stat stat-match"><strong>91</strong> exact match</div>
+    <div class="stat stat-close"><strong>107</strong> mapped to closest</div>
+    <div class="stat stat-miss"><strong>1</strong> not in DS</div>
+  </div>
+  <div class="controls">
+    <button class="filter-btn active" data-f="all">All</button>
+    <button class="filter-btn" data-f="match">Match only</button>
+    <button class="filter-btn" data-f="close">Mapped only</button>
+    <button class="filter-btn" data-f="miss">Not in DS only</button>
+    <select class="section-select" id="sectionSelect">
+      <option value="all">All sections</option>
+      <option value="Breadcrumb">Breadcrumb</option><option value="Checklist Popover (hover on CHECKLIST)">Checklist Popover (hover on CHECKLIST)</option><option value="Compliance Verified Tooltip (hover on green check)">Compliance Verified Tooltip (hover on green check)</option><option value="Filters Modal">Filters Modal</option><option value="Global Search">Global Search</option><option value="Hover States (generic)">Hover States (generic)</option><option value="Page Header > Add Transaction Button">Page Header > Add Transaction Button</option><option value="Page Header > Create Referral Button">Page Header > Create Referral Button</option><option value="Page Header > Filters Button">Page Header > Filters Button</option><option value="Page Header > View Toggle">Page Header > View Toggle</option><option value="Pagination">Pagination</option><option value="Power Audit Tooltip (hover on lightning icon)">Power Audit Tooltip (hover on lightning icon)</option><option value="Requires Attention Popover (hover on alert icon)">Requires Attention Popover (hover on alert icon)</option><option value="Road to Success Popover (hover on ROAD TO SUCCESS)">Road to Success Popover (hover on ROAD TO SUCCESS)</option><option value="Sort Bar">Sort Bar</option><option value="Sort Dropdown">Sort Dropdown</option><option value="Sub-Tabs (Active / Closed / Terminated)">Sub-Tabs (Active / Closed / Terminated)</option><option value="Tabs (All / Sale / Lease / Referrals)">Tabs (All / Sale / Lease / Referrals)</option><option value="Transaction Card > Action Icons">Transaction Card > Action Icons</option><option value="Transaction Card > Avatars">Transaction Card > Avatars</option><option value="Transaction Card > Checklist">Transaction Card > Checklist</option><option value="Transaction Card > Container">Transaction Card > Container</option><option value="Transaction Card > Countdown Badge (X days Y hours)">Transaction Card > Countdown Badge (X days Y hours)</option><option value="Transaction Card > Expanded Card Fields">Transaction Card > Expanded Card Fields</option><option value="Transaction Card > Notification Badge">Transaction Card > Notification Badge</option><option value="Transaction Card > Progress">Transaction Card > Progress</option><option value="Transaction Card > Property Type Pill">Transaction Card > Property Type Pill</option><option value="Transaction Card > Status Pill">Transaction Card > Status Pill</option><option value="Transaction Card > Transaction Code">Transaction Card > Transaction Code</option><option value="Transaction Card > Type Tag">Transaction Card > Type Tag</option>
+    </select>
+    <input type="text" class="search-input" id="searchInput" placeholder="Search component, hex, token…">
+  </div>
+</div>
+
+<div class="table-wrapper">
+  <table id="auditTable">
+    <thead>
+      <tr>
+        <th data-col="0">Section</th>
+        <th data-col="1">Component</th>
+        <th data-col="2">Property</th>
+        <th>Current</th>
+        <th data-col="4">Current Hex</th>
+        <th data-col="5">Real UI Token</th>
+        <th>Token</th>
+        <th data-col="7">Real UI Hex</th>
+        <th data-col="8">Status</th>
+        <th data-col="9">Visible On</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"><tr class="r-close" data-status="Mapped to closest" data-section="Breadcrumb">
+    <td>Breadcrumb</td>
+    <td class="strong">Active page text (Home)</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#3E3F3C" title="#3E3F3C"></span></td>
+    <td><code>#3E3F3C</code></td>
+    <td><code>real-grey-900</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#3D3C3C" title="#3D3C3C"></span></td>
+    <td><code>#3D3C3C</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Breadcrumb">
+    <td>Breadcrumb</td>
+    <td class="strong">Chevron separator</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#A1A1AA" title="#A1A1AA"></span></td>
+    <td><code>#A1A1AA</code></td>
+    <td><code>slate-400</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#94A3B8" title="#94A3B8"></span></td>
+    <td><code>#94A3B8</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Breadcrumb">
+    <td>Breadcrumb</td>
+    <td class="strong">Inactive link text (My Transactions)</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#A1A1AA" title="#A1A1AA"></span></td>
+    <td><code>#A1A1AA</code></td>
+    <td><code>slate-400</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#94A3B8" title="#94A3B8"></span></td>
+    <td><code>#94A3B8</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Global Search">
+    <td>Global Search</td>
+    <td class="strong">Input background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><code>white</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Global Search">
+    <td>Global Search</td>
+    <td class="strong">Input border</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#D2D5DB" title="#D2D5DB"></span></td>
+    <td><code>#D2D5DB</code></td>
+    <td><code>real-grey-200</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#D1D0D0" title="#D1D0D0"></span></td>
+    <td><code>#D1D0D0</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Global Search">
+    <td>Global Search</td>
+    <td class="strong">Search icon</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#3B82F6" title="#3B82F6"></span></td>
+    <td><code>#3B82F6</code></td>
+    <td><code>real-blue-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Page Header > Filters Button">
+    <td>Page Header > Filters Button</td>
+    <td class="strong">Filters button background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><code>white</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Page Header > Filters Button">
+    <td>Page Header > Filters Button</td>
+    <td class="strong">Filters button text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#615B56" title="#615B56"></span></td>
+    <td><code>#615B56</code></td>
+    <td><code>real-grey-600</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#5D5D5D" title="#5D5D5D"></span></td>
+    <td><code>#5D5D5D</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Page Header > Filters Button">
+    <td>Page Header > Filters Button</td>
+    <td class="strong">Filters button border</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#DADADA" title="#DADADA"></span></td>
+    <td><code>#DADADA</code></td>
+    <td><code>real-grey-200</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#D1D0D0" title="#D1D0D0"></span></td>
+    <td><code>#D1D0D0</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Page Header > Filters Button">
+    <td>Page Header > Filters Button</td>
+    <td class="strong">Filters button icon</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#615B56" title="#615B56"></span></td>
+    <td><code>#615B56</code></td>
+    <td><code>real-grey-600</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#5D5D5D" title="#5D5D5D"></span></td>
+    <td><code>#5D5D5D</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Page Header > View Toggle">
+    <td>Page Header > View Toggle</td>
+    <td class="strong">Active view toggle background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#3B82F6" title="#3B82F6/10%"></span></td>
+    <td><code>#3B82F6/10%</code></td>
+    <td><code>real-blue-500/10%</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD/10%"></span></td>
+    <td><code>#4967FD/10%</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Page Header > View Toggle">
+    <td>Page Header > View Toggle</td>
+    <td class="strong">Active view toggle icon</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#3B82F6" title="#3B82F6"></span></td>
+    <td><code>#3B82F6</code></td>
+    <td><code>real-blue-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Page Header > View Toggle">
+    <td>Page Header > View Toggle</td>
+    <td class="strong">Inactive view toggle icon</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><code>real-black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Page Header > View Toggle">
+    <td>Page Header > View Toggle</td>
+    <td class="strong">Divider pipe</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#DADADA" title="#DADADA"></span></td>
+    <td><code>#DADADA</code></td>
+    <td><code>real-grey-200</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#D1D0D0" title="#D1D0D0"></span></td>
+    <td><code>#D1D0D0</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Page Header > Create Referral Button">
+    <td>Page Header > Create Referral Button</td>
+    <td class="strong">Create Referral text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><code>real-blue-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Page Header > Create Referral Button">
+    <td>Page Header > Create Referral Button</td>
+    <td class="strong">Create Referral outline (inset box-shadow)</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><code>real-blue-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Page Header > Create Referral Button">
+    <td>Page Header > Create Referral Button</td>
+    <td class="strong">Create Referral plus icon</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><code>real-blue-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Page Header > Add Transaction Button">
+    <td>Page Header > Add Transaction Button</td>
+    <td class="strong">Add Transaction background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><code>real-blue-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Page Header > Add Transaction Button">
+    <td>Page Header > Add Transaction Button</td>
+    <td class="strong">Add Transaction text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><code>white</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Page Header > Add Transaction Button">
+    <td>Page Header > Add Transaction Button</td>
+    <td class="strong">Add Transaction plus icon</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><code>white</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Tabs (All / Sale / Lease / Referrals)">
+    <td>Tabs (All / Sale / Lease / Referrals)</td>
+    <td class="strong">Active tab text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><code>real-black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Tabs (All / Sale / Lease / Referrals)">
+    <td>Tabs (All / Sale / Lease / Referrals)</td>
+    <td class="strong">Active tab underline</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><code>real-blue-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Tabs (All / Sale / Lease / Referrals)">
+    <td>Tabs (All / Sale / Lease / Referrals)</td>
+    <td class="strong">Inactive tab text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#7B7A7A" title="#7B7A7A"></span></td>
+    <td><code>#7B7A7A</code></td>
+    <td><code>real-grey-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#767676" title="#767676"></span></td>
+    <td><code>#767676</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Tabs (All / Sale / Lease / Referrals)">
+    <td>Tabs (All / Sale / Lease / Referrals)</td>
+    <td class="strong">Tab strip bottom border</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F2F2F4" title="#F2F2F4"></span></td>
+    <td><code>#F2F2F4</code></td>
+    <td><code>real-grey-50</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F6F5F5" title="#F6F5F5"></span></td>
+    <td><code>#F6F5F5</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Sub-Tabs (Active / Closed / Terminated)">
+    <td>Sub-Tabs (Active / Closed / Terminated)</td>
+    <td class="strong">Sub-tabs container background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F6F8FC" title="#F6F8FC"></span></td>
+    <td><code>#F6F8FC</code></td>
+    <td><code>real-seaglass-50</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F2F9F9" title="#F2F9F9"></span></td>
+    <td><code>#F2F9F9</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Sub-Tabs (Active / Closed / Terminated)">
+    <td>Sub-Tabs (Active / Closed / Terminated)</td>
+    <td class="strong">Active pill background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#629BF8" title="#629BF8"></span></td>
+    <td><code>#629BF8</code></td>
+    <td><code>real-blue-400</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#7798FF" title="#7798FF"></span></td>
+    <td><code>#7798FF</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Sub-Tabs (Active / Closed / Terminated)">
+    <td>Sub-Tabs (Active / Closed / Terminated)</td>
+    <td class="strong">Active pill text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><code>white</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Sub-Tabs (Active / Closed / Terminated)">
+    <td>Sub-Tabs (Active / Closed / Terminated)</td>
+    <td class="strong">Inactive pill background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#EEEEEE" title="#EEEEEE"></span></td>
+    <td><code>#EEEEEE</code></td>
+    <td><code>real-green-50</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F1F8F4" title="#F1F8F4"></span></td>
+    <td><code>#F1F8F4</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Sub-Tabs (Active / Closed / Terminated)">
+    <td>Sub-Tabs (Active / Closed / Terminated)</td>
+    <td class="strong">Inactive pill text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#615B56" title="#615B56"></span></td>
+    <td><code>#615B56</code></td>
+    <td><code>real-grey-600</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#5D5D5D" title="#5D5D5D"></span></td>
+    <td><code>#5D5D5D</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Sort Bar">
+    <td>Sort Bar</td>
+    <td class="strong">Sort By label</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#7B7A7A" title="#7B7A7A"></span></td>
+    <td><code>#7B7A7A</code></td>
+    <td><code>real-grey-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#767676" title="#767676"></span></td>
+    <td><code>#767676</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Sort Bar">
+    <td>Sort Bar</td>
+    <td class="strong">Sort dropdown background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><code>white</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Sort Bar">
+    <td>Sort Bar</td>
+    <td class="strong">Sort dropdown border</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#D2D5DB" title="#D2D5DB"></span></td>
+    <td><code>#D2D5DB</code></td>
+    <td><code>real-grey-200</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#D1D0D0" title="#D1D0D0"></span></td>
+    <td><code>#D1D0D0</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Sort Bar">
+    <td>Sort Bar</td>
+    <td class="strong">Sort dropdown value text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><code>real-black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Sort Bar">
+    <td>Sort Bar</td>
+    <td class="strong">Sort dropdown chevron</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><code>real-black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Sort Bar">
+    <td>Sort Bar</td>
+    <td class="strong">Sort direction button background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><code>white</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Sort Bar">
+    <td>Sort Bar</td>
+    <td class="strong">Sort direction button border</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#BFC3CA" title="#BFC3CA"></span></td>
+    <td><code>#BFC3CA</code></td>
+    <td><code>real-grey-200</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#D1D0D0" title="#D1D0D0"></span></td>
+    <td><code>#D1D0D0</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Sort Bar">
+    <td>Sort Bar</td>
+    <td class="strong">Expand All / Collapse All divider</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#A8A8A8" title="#A8A8A8"></span></td>
+    <td><code>#A8A8A8</code></td>
+    <td><code>real-grey-300</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#B0B0B0" title="#B0B0B0"></span></td>
+    <td><code>#B0B0B0</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Sort Bar">
+    <td>Sort Bar</td>
+    <td class="strong">Expand All / Collapse All link text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><code>real-blue-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Container">
+    <td>Transaction Card > Container</td>
+    <td class="strong">Card background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><code>white</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Container">
+    <td>Transaction Card > Container</td>
+    <td class="strong">Card border (default)</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#E4E4E7" title="#E4E4E7"></span></td>
+    <td><code>#E4E4E7</code></td>
+    <td><code>real-grey-100</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#E7E6E6" title="#E7E6E6"></span></td>
+    <td><code>#E7E6E6</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Container">
+    <td>Transaction Card > Container</td>
+    <td class="strong">Card border (hover)</td>
+    <td>Border color (hover)</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#7A8496" title="#7A8496"></span></td>
+    <td><code>#7A8496</code></td>
+    <td><code>real-grey-400</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#888888" title="#888888"></span></td>
+    <td><code>#888888</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Container">
+    <td>Transaction Card > Container</td>
+    <td class="strong">Card header bottom border</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#EEEEEE" title="#EEEEEE"></span></td>
+    <td><code>#EEEEEE</code></td>
+    <td><code>real-green-50</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F1F8F4" title="#F1F8F4"></span></td>
+    <td><code>#F1F8F4</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Container">
+    <td>Transaction Card > Container</td>
+    <td class="strong">Expand/collapse button background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD/10%"></span></td>
+    <td><code>#4967FD/10%</code></td>
+    <td><code>real-blue-500/10%</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD/10%"></span></td>
+    <td><code>#4967FD/10%</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Container">
+    <td>Transaction Card > Container</td>
+    <td class="strong">Expand/collapse button icon</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><code>real-blue-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Container">
+    <td>Transaction Card > Container</td>
+    <td class="strong">Vertical divider in header</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#EEEEEE" title="#EEEEEE"></span></td>
+    <td><code>#EEEEEE</code></td>
+    <td><code>real-green-50</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F1F8F4" title="#F1F8F4"></span></td>
+    <td><code>#F1F8F4</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Type Tag">
+    <td>Transaction Card > Type Tag</td>
+    <td class="strong">Sale tag text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#050E3D" title="#050E3D"></span></td>
+    <td><code>#050E3D</code></td>
+    <td><code>Gray/900</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#101828" title="#101828"></span></td>
+    <td><code>#101828</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small">All-*, Sale-*</td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Type Tag">
+    <td>Transaction Card > Type Tag</td>
+    <td class="strong">Sale tag icon</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#050E3D" title="#050E3D"></span></td>
+    <td><code>#050E3D</code></td>
+    <td><code>Gray/900</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#101828" title="#101828"></span></td>
+    <td><code>#101828</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small">All-*, Sale-*</td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Type Tag">
+    <td>Transaction Card > Type Tag</td>
+    <td class="strong">Lease tag text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#003036" title="#003036"></span></td>
+    <td><code>#003036</code></td>
+    <td><code>real-green-900</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1A3A30" title="#1A3A30"></span></td>
+    <td><code>#1A3A30</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small">All-*, Lease-*</td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Type Tag">
+    <td>Transaction Card > Type Tag</td>
+    <td class="strong">Internal Referral tag text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#731A3A" title="#731A3A"></span></td>
+    <td><code>#731A3A</code></td>
+    <td><code>real-red-900</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#8A1238" title="#8A1238"></span></td>
+    <td><code>#8A1238</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small">All-*, Referrals-*</td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Progress">
+    <td>Transaction Card > Progress</td>
+    <td class="strong">ROAD TO SUCCESS label</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#7A8496" title="#7A8496"></span></td>
+    <td><code>#7A8496</code></td>
+    <td><code>real-grey-400</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#888888" title="#888888"></span></td>
+    <td><code>#888888</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Progress">
+    <td>Transaction Card > Progress</td>
+    <td class="strong">Progress bar track</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F2F2F4" title="#F2F2F4"></span></td>
+    <td><code>#F2F2F4</code></td>
+    <td><code>real-grey-50</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F6F5F5" title="#F6F5F5"></span></td>
+    <td><code>#F6F5F5</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Progress">
+    <td>Transaction Card > Progress</td>
+    <td class="strong">Progress bar fill</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#7A8496" title="#7A8496"></span></td>
+    <td><code>#7A8496</code></td>
+    <td><code>real-grey-400</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#888888" title="#888888"></span></td>
+    <td><code>#888888</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Progress">
+    <td>Transaction Card > Progress</td>
+    <td class="strong">Percentage text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><code>real-black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Checklist">
+    <td>Transaction Card > Checklist</td>
+    <td class="strong">CHECKLIST label</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#7A8496" title="#7A8496"></span></td>
+    <td><code>#7A8496</code></td>
+    <td><code>real-grey-400</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#888888" title="#888888"></span></td>
+    <td><code>#888888</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Checklist">
+    <td>Transaction Card > Checklist</td>
+    <td class="strong">Completed count number</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1C244E" title="#1C244E"></span></td>
+    <td><code>#1C244E</code></td>
+    <td><code>real-blue-950</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#171C4F" title="#171C4F"></span></td>
+    <td><code>#171C4F</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Status Pill">
+    <td>Transaction Card > Status Pill</td>
+    <td class="strong">New - text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#7B7A7A" title="#7B7A7A"></span></td>
+    <td><code>#7B7A7A</code></td>
+    <td><code>real-grey-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#767676" title="#767676"></span></td>
+    <td><code>#767676</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Status Pill">
+    <td>Transaction Card > Status Pill</td>
+    <td class="strong">Calculate Ledger - text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#7B7A7A" title="#7B7A7A"></span></td>
+    <td><code>#7B7A7A</code></td>
+    <td><code>real-grey-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#767676" title="#767676"></span></td>
+    <td><code>#767676</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Status Pill">
+    <td>Transaction Card > Status Pill</td>
+    <td class="strong">Needs Commission Validation - text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#C98B11" title="#C98B11"></span></td>
+    <td><code>#C98B11</code></td>
+    <td><code>amber-600</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#D97706" title="#D97706"></span></td>
+    <td><code>#D97706</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small">All - Active; Sale - Active; Lease - Active; Referrals - Active</td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Status Pill">
+    <td>Transaction Card > Status Pill</td>
+    <td class="strong">Needs Commission Validation - icon</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#C98B11" title="#C98B11"></span></td>
+    <td><code>#C98B11</code></td>
+    <td><code>amber-600</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#D97706" title="#D97706"></span></td>
+    <td><code>#D97706</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small">All - Active; Sale - Active; Lease - Active; Referrals - Active</td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Status Pill">
+    <td>Transaction Card > Status Pill</td>
+    <td class="strong">Commission Validated - text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><code>real-blue-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Status Pill">
+    <td>Transaction Card > Status Pill</td>
+    <td class="strong">Ready For Commission Document Generation - text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#7B7A7A" title="#7B7A7A"></span></td>
+    <td><code>#7B7A7A</code></td>
+    <td><code>real-grey-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#767676" title="#767676"></span></td>
+    <td><code>#767676</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Status Pill">
+    <td>Transaction Card > Status Pill</td>
+    <td class="strong">Commission Document Generated - text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#E26811" title="#E26811"></span></td>
+    <td><code>#E26811</code></td>
+    <td><code>amber-600</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#D97706" title="#D97706"></span></td>
+    <td><code>#D97706</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small">All - Active; Sale - Active</td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Status Pill">
+    <td>Transaction Card > Status Pill</td>
+    <td class="strong">Commission Document Generated - icon</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#E26811" title="#E26811"></span></td>
+    <td><code>#E26811</code></td>
+    <td><code>amber-600</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#D97706" title="#D97706"></span></td>
+    <td><code>#D97706</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small">All - Active; Sale - Active</td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Status Pill">
+    <td>Transaction Card > Status Pill</td>
+    <td class="strong">Commission Document Approved - text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><code>real-blue-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Status Pill">
+    <td>Transaction Card > Status Pill</td>
+    <td class="strong">Commission Document Sent - text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><code>real-blue-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small">Sale - Active; Referrals - Active</td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Status Pill">
+    <td>Transaction Card > Status Pill</td>
+    <td class="strong">Approved For Closing - text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#439775" title="#439775"></span></td>
+    <td><code>#439775</code></td>
+    <td><code>real-green-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#439775" title="#439775"></span></td>
+    <td><code>#439775</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small">All - Active; Sale - Active; Lease - Active</td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Status Pill">
+    <td>Transaction Card > Status Pill</td>
+    <td class="strong">Approved For Closing - icon</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#439775" title="#439775"></span></td>
+    <td><code>#439775</code></td>
+    <td><code>real-green-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#439775" title="#439775"></span></td>
+    <td><code>#439775</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small">All - Active; Sale - Active; Lease - Active</td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Status Pill">
+    <td>Transaction Card > Status Pill</td>
+    <td class="strong">Closed - text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#439775" title="#439775"></span></td>
+    <td><code>#439775</code></td>
+    <td><code>real-green-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#439775" title="#439775"></span></td>
+    <td><code>#439775</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small">Lease - Closed</td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Status Pill">
+    <td>Transaction Card > Status Pill</td>
+    <td class="strong">Waiting On Payment - text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#439775" title="#439775"></span></td>
+    <td><code>#439775</code></td>
+    <td><code>real-green-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#439775" title="#439775"></span></td>
+    <td><code>#439775</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Status Pill">
+    <td>Transaction Card > Status Pill</td>
+    <td class="strong">Payment Accepted - text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#439775" title="#439775"></span></td>
+    <td><code>#439775</code></td>
+    <td><code>real-green-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#439775" title="#439775"></span></td>
+    <td><code>#439775</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small">All - Closed; Sale - Closed; Lease - Closed; Referrals - Closed</td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Status Pill">
+    <td>Transaction Card > Status Pill</td>
+    <td class="strong">Payment Scheduled - text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#439775" title="#439775"></span></td>
+    <td><code>#439775</code></td>
+    <td><code>real-green-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#439775" title="#439775"></span></td>
+    <td><code>#439775</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small">All - Closed; Sale - Closed; Lease - Closed; Referrals - Closed</td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Status Pill">
+    <td>Transaction Card > Status Pill</td>
+    <td class="strong">Settled - text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#439775" title="#439775"></span></td>
+    <td><code>#439775</code></td>
+    <td><code>real-green-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#439775" title="#439775"></span></td>
+    <td><code>#439775</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small">All - Closed; Sale - Closed; Referrals - Closed</td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Status Pill">
+    <td>Transaction Card > Status Pill</td>
+    <td class="strong">Termination Requested - text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#731A3A" title="#731A3A"></span></td>
+    <td><code>#731A3A</code></td>
+    <td><code>real-red-900</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#8A1238" title="#8A1238"></span></td>
+    <td><code>#8A1238</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small">All - Active; Sale - Active; Referrals - Active</td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Status Pill">
+    <td>Transaction Card > Status Pill</td>
+    <td class="strong">Termination Requested - icon</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#731A3A" title="#731A3A"></span></td>
+    <td><code>#731A3A</code></td>
+    <td><code>real-red-900</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#8A1238" title="#8A1238"></span></td>
+    <td><code>#8A1238</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small">All - Active; Sale - Active; Referrals - Active</td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Status Pill">
+    <td>Transaction Card > Status Pill</td>
+    <td class="strong">Terminated - text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F84C6C" title="#F84C6C"></span></td>
+    <td><code>#F84C6C</code></td>
+    <td><code>real-red-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F74D6B" title="#F74D6B"></span></td>
+    <td><code>#F74D6B</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small">All - Terminated; Sale - Terminated; Lease - Terminated; Referrals - Terminated</td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Status Pill">
+    <td>Transaction Card > Status Pill</td>
+    <td class="strong">Listing Active - text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#439775" title="#439775"></span></td>
+    <td><code>#439775</code></td>
+    <td><code>real-green-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#439775" title="#439775"></span></td>
+    <td><code>#439775</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Status Pill">
+    <td>Transaction Card > Status Pill</td>
+    <td class="strong">Listing In Contract - text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#C98B11" title="#C98B11"></span></td>
+    <td><code>#C98B11</code></td>
+    <td><code>amber-600</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#D97706" title="#D97706"></span></td>
+    <td><code>#D97706</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Status Pill">
+    <td>Transaction Card > Status Pill</td>
+    <td class="strong">Listing Closed - text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#7B7A7A" title="#7B7A7A"></span></td>
+    <td><code>#7B7A7A</code></td>
+    <td><code>real-grey-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#767676" title="#767676"></span></td>
+    <td><code>#767676</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Status Pill">
+    <td>Transaction Card > Status Pill</td>
+    <td class="strong">Trade Record Sheet Confirmed - text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><code>real-blue-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small">All - Active; Sale - Active; Referrals - Active</td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Status Pill">
+    <td>Transaction Card > Status Pill</td>
+    <td class="strong">Trade Record Sheet Confirmed - icon</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><code>real-blue-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small">All - Active; Sale - Active; Referrals - Active</td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Transaction Code">
+    <td>Transaction Card > Transaction Code</td>
+    <td class="strong">Code pill background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F6F8FC" title="#F6F8FC"></span></td>
+    <td><code>#F6F8FC</code></td>
+    <td><code>real-seaglass-50</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F2F9F9" title="#F2F9F9"></span></td>
+    <td><code>#F2F9F9</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Transaction Code">
+    <td>Transaction Card > Transaction Code</td>
+    <td class="strong">Code pill border</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F2F2F4" title="#F2F2F4"></span></td>
+    <td><code>#F2F2F4</code></td>
+    <td><code>real-grey-50</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F6F5F5" title="#F6F5F5"></span></td>
+    <td><code>#F6F5F5</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Transaction Code">
+    <td>Transaction Card > Transaction Code</td>
+    <td class="strong">Code text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><code>real-black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Transaction Code">
+    <td>Transaction Card > Transaction Code</td>
+    <td class="strong">Copy icon</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><code>real-black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Countdown Badge (X days Y hours)">
+    <td>Transaction Card > Countdown Badge (X days Y hours)</td>
+    <td class="strong">Badge border</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#E4E4E7" title="#E4E4E7"></span></td>
+    <td><code>#E4E4E7</code></td>
+    <td><code>real-grey-100</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#E7E6E6" title="#E7E6E6"></span></td>
+    <td><code>#E7E6E6</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Countdown Badge (X days Y hours)">
+    <td>Transaction Card > Countdown Badge (X days Y hours)</td>
+    <td class="strong">Badge text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#000000" title="#000000"></span></td>
+    <td><code>#000000</code></td>
+    <td><code>black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#000000" title="#000000"></span></td>
+    <td><code>#000000</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Action Icons">
+    <td>Transaction Card > Action Icons</td>
+    <td class="strong">Action button background (default)</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F2F2F4" title="#F2F2F4"></span></td>
+    <td><code>#F2F2F4</code></td>
+    <td><code>real-grey-50</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F6F5F5" title="#F6F5F5"></span></td>
+    <td><code>#F6F5F5</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Action Icons">
+    <td>Transaction Card > Action Icons</td>
+    <td class="strong">Action button background (hover)</td>
+    <td>Background color (hover)</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#DADADA" title="#DADADA"></span></td>
+    <td><code>#DADADA</code></td>
+    <td><code>real-grey-200</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#D1D0D0" title="#D1D0D0"></span></td>
+    <td><code>#D1D0D0</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Action Icons">
+    <td>Transaction Card > Action Icons</td>
+    <td class="strong">Power Audit (lightning) icon</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F84C6C" title="#F84C6C"></span></td>
+    <td><code>#F84C6C</code></td>
+    <td><code>real-red-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F74D6B" title="#F74D6B"></span></td>
+    <td><code>#F74D6B</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Action Icons">
+    <td>Transaction Card > Action Icons</td>
+    <td class="strong">Requires Attention (alert triangle) icon</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F84C6C" title="#F84C6C"></span></td>
+    <td><code>#F84C6C</code></td>
+    <td><code>real-red-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F74D6B" title="#F74D6B"></span></td>
+    <td><code>#F74D6B</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Action Icons">
+    <td>Transaction Card > Action Icons</td>
+    <td class="strong">Compliance Verified (check) icon</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#439775" title="#439775"></span></td>
+    <td><code>#439775</code></td>
+    <td><code>real-green-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#439775" title="#439775"></span></td>
+    <td><code>#439775</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Action Icons">
+    <td>Transaction Card > Action Icons</td>
+    <td class="strong">Confirmed Commission Deposit ($) icon</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#439775" title="#439775"></span></td>
+    <td><code>#439775</code></td>
+    <td><code>real-green-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#439775" title="#439775"></span></td>
+    <td><code>#439775</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Expanded Card Fields">
+    <td>Transaction Card > Expanded Card Fields</td>
+    <td class="strong">Address text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><code>real-black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Expanded Card Fields">
+    <td>Transaction Card > Expanded Card Fields</td>
+    <td class="strong">TRANSACTION OWNER label</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#7A8496" title="#7A8496"></span></td>
+    <td><code>#7A8496</code></td>
+    <td><code>real-grey-400</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#888888" title="#888888"></span></td>
+    <td><code>#888888</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Expanded Card Fields">
+    <td>Transaction Card > Expanded Card Fields</td>
+    <td class="strong">TRANSACTION OWNER & TEAM label</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#7A8496" title="#7A8496"></span></td>
+    <td><code>#7A8496</code></td>
+    <td><code>real-grey-400</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#888888" title="#888888"></span></td>
+    <td><code>#888888</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Expanded Card Fields">
+    <td>Transaction Card > Expanded Card Fields</td>
+    <td class="strong">Transaction Owner value</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><code>real-black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Expanded Card Fields">
+    <td>Transaction Card > Expanded Card Fields</td>
+    <td class="strong">REPRESENTING label</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#7A8496" title="#7A8496"></span></td>
+    <td><code>#7A8496</code></td>
+    <td><code>real-grey-400</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#888888" title="#888888"></span></td>
+    <td><code>#888888</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Expanded Card Fields">
+    <td>Transaction Card > Expanded Card Fields</td>
+    <td class="strong">Representing value (Buy Side / Listing Side)</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><code>real-black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Expanded Card Fields">
+    <td>Transaction Card > Expanded Card Fields</td>
+    <td class="strong">CLOSING DATE label</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#7A8496" title="#7A8496"></span></td>
+    <td><code>#7A8496</code></td>
+    <td><code>real-grey-400</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#888888" title="#888888"></span></td>
+    <td><code>#888888</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Expanded Card Fields">
+    <td>Transaction Card > Expanded Card Fields</td>
+    <td class="strong">Closing Date value</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><code>real-black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Expanded Card Fields">
+    <td>Transaction Card > Expanded Card Fields</td>
+    <td class="strong">SALE PRICE label</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#7A8496" title="#7A8496"></span></td>
+    <td><code>#7A8496</code></td>
+    <td><code>real-grey-400</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#888888" title="#888888"></span></td>
+    <td><code>#888888</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Expanded Card Fields">
+    <td>Transaction Card > Expanded Card Fields</td>
+    <td class="strong">Sale Price value</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><code>real-black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Expanded Card Fields">
+    <td>Transaction Card > Expanded Card Fields</td>
+    <td class="strong">BUYER label</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#7A8496" title="#7A8496"></span></td>
+    <td><code>#7A8496</code></td>
+    <td><code>real-grey-400</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#888888" title="#888888"></span></td>
+    <td><code>#888888</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Expanded Card Fields">
+    <td>Transaction Card > Expanded Card Fields</td>
+    <td class="strong">Buyer name value</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><code>real-black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Expanded Card Fields">
+    <td>Transaction Card > Expanded Card Fields</td>
+    <td class="strong">SELLER label</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#7A8496" title="#7A8496"></span></td>
+    <td><code>#7A8496</code></td>
+    <td><code>real-grey-400</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#888888" title="#888888"></span></td>
+    <td><code>#888888</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Expanded Card Fields">
+    <td>Transaction Card > Expanded Card Fields</td>
+    <td class="strong">Seller name value</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><code>real-black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Expanded Card Fields">
+    <td>Transaction Card > Expanded Card Fields</td>
+    <td class="strong">MONIES label</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#7A8496" title="#7A8496"></span></td>
+    <td><code>#7A8496</code></td>
+    <td><code>real-grey-400</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#888888" title="#888888"></span></td>
+    <td><code>#888888</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Expanded Card Fields">
+    <td>Transaction Card > Expanded Card Fields</td>
+    <td class="strong">Gross Comm value (e.g. $10,700.01)</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><code>real-black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Expanded Card Fields">
+    <td>Transaction Card > Expanded Card Fields</td>
+    <td class="strong">SYSTEM CLOSING DATE label</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#7A8496" title="#7A8496"></span></td>
+    <td><code>#7A8496</code></td>
+    <td><code>real-grey-400</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#888888" title="#888888"></span></td>
+    <td><code>#888888</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Expanded Card Fields">
+    <td>Transaction Card > Expanded Card Fields</td>
+    <td class="strong">System Closing Date value</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><code>real-black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Expanded Card Fields">
+    <td>Transaction Card > Expanded Card Fields</td>
+    <td class="strong">INVOICE label</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#7A8496" title="#7A8496"></span></td>
+    <td><code>#7A8496</code></td>
+    <td><code>real-grey-400</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#888888" title="#888888"></span></td>
+    <td><code>#888888</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Expanded Card Fields">
+    <td>Transaction Card > Expanded Card Fields</td>
+    <td class="strong">Invoice value (e.g. INV-aJgthQf)</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><code>real-black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Expanded Card Fields">
+    <td>Transaction Card > Expanded Card Fields</td>
+    <td class="strong">AGENTS label</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#7A8496" title="#7A8496"></span></td>
+    <td><code>#7A8496</code></td>
+    <td><code>real-grey-400</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#888888" title="#888888"></span></td>
+    <td><code>#888888</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Expanded Card Fields">
+    <td>Transaction Card > Expanded Card Fields</td>
+    <td class="strong">FIRM DATE label</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#7A8496" title="#7A8496"></span></td>
+    <td><code>#7A8496</code></td>
+    <td><code>real-grey-400</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#888888" title="#888888"></span></td>
+    <td><code>#888888</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Expanded Card Fields">
+    <td>Transaction Card > Expanded Card Fields</td>
+    <td class="strong">Firm Date value</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><code>real-black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Property Type Pill">
+    <td>Transaction Card > Property Type Pill</td>
+    <td class="strong">Residential pill background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F6F5F5" title="#F6F5F5"></span></td>
+    <td><code>#F6F5F5</code></td>
+    <td><code>real-grey-50</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F6F5F5" title="#F6F5F5"></span></td>
+    <td><code>#F6F5F5</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small">All tabs</td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Property Type Pill">
+    <td>Transaction Card > Property Type Pill</td>
+    <td class="strong">Residential pill text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#454545" title="#454545"></span></td>
+    <td><code>#454545</code></td>
+    <td><code>real-grey-800</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#454545" title="#454545"></span></td>
+    <td><code>#454545</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small">All tabs</td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Property Type Pill">
+    <td>Transaction Card > Property Type Pill</td>
+    <td class="strong">Residential pill border</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#E7E6E6" title="#E7E6E6"></span></td>
+    <td><code>#E7E6E6</code></td>
+    <td><code>real-grey-100</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#E7E6E6" title="#E7E6E6"></span></td>
+    <td><code>#E7E6E6</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small">All tabs</td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Property Type Pill">
+    <td>Transaction Card > Property Type Pill</td>
+    <td class="strong">Commercial pill background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#EDF4FF" title="#EDF4FF"></span></td>
+    <td><code>#EDF4FF</code></td>
+    <td><code>real-blue-50</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#EDF4FF" title="#EDF4FF"></span></td>
+    <td><code>#EDF4FF</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small">Most tabs (excluding Sale-Terminated, Lease-Terminated, Referrals tabs)</td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Property Type Pill">
+    <td>Transaction Card > Property Type Pill</td>
+    <td class="strong">Commercial pill text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#2632AD" title="#2632AD"></span></td>
+    <td><code>#2632AD</code></td>
+    <td><code>real-blue-800</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#2632AD" title="#2632AD"></span></td>
+    <td><code>#2632AD</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small">Most tabs (excluding Sale-Terminated, Lease-Terminated, Referrals tabs)</td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Property Type Pill">
+    <td>Transaction Card > Property Type Pill</td>
+    <td class="strong">Commercial pill border</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#DDEBFF" title="#DDEBFF"></span></td>
+    <td><code>#DDEBFF</code></td>
+    <td><code>real-blue-100</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#DDEBFF" title="#DDEBFF"></span></td>
+    <td><code>#DDEBFF</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small">Most tabs (excluding Sale-Terminated, Lease-Terminated, Referrals tabs)</td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Property Type Pill">
+    <td>Transaction Card > Property Type Pill</td>
+    <td class="strong">Condo pill background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFBEB" title="#FFFBEB"></span></td>
+    <td><code>#FFFBEB</code></td>
+    <td><code>amber-50</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFBEB" title="#FFFBEB"></span></td>
+    <td><code>#FFFBEB</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small">Sale-Active, Lease-Active</td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Property Type Pill">
+    <td>Transaction Card > Property Type Pill</td>
+    <td class="strong">Condo pill text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#92400E" title="#92400E"></span></td>
+    <td><code>#92400E</code></td>
+    <td><code>amber-800</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#92400E" title="#92400E"></span></td>
+    <td><code>#92400E</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small">Sale-Active, Lease-Active</td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Property Type Pill">
+    <td>Transaction Card > Property Type Pill</td>
+    <td class="strong">Condo pill border</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FEF3C7" title="#FEF3C7"></span></td>
+    <td><code>#FEF3C7</code></td>
+    <td><code>amber-100</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FEF3C7" title="#FEF3C7"></span></td>
+    <td><code>#FEF3C7</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small">Sale-Active, Lease-Active</td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Property Type Pill">
+    <td>Transaction Card > Property Type Pill</td>
+    <td class="strong">Mobile Home pill background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F1F8F4" title="#F1F8F4"></span></td>
+    <td><code>#F1F8F4</code></td>
+    <td><code>real-green-50</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F1F8F4" title="#F1F8F4"></span></td>
+    <td><code>#F1F8F4</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small">Lease-Closed</td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Property Type Pill">
+    <td>Transaction Card > Property Type Pill</td>
+    <td class="strong">Mobile Home pill text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1E4738" title="#1E4738"></span></td>
+    <td><code>#1E4738</code></td>
+    <td><code>real-green-800</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1E4738" title="#1E4738"></span></td>
+    <td><code>#1E4738</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small">Lease-Closed</td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Property Type Pill">
+    <td>Transaction Card > Property Type Pill</td>
+    <td class="strong">Mobile Home pill border</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#DCEFE4" title="#DCEFE4"></span></td>
+    <td><code>#DCEFE4</code></td>
+    <td><code>real-green-100</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#DCEFE4" title="#DCEFE4"></span></td>
+    <td><code>#DCEFE4</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small">Lease-Closed</td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Avatars">
+    <td>Transaction Card > Avatars</td>
+    <td class="strong">Purple avatar background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#321268" title="#321268"></span></td>
+    <td><code>#321268</code></td>
+    <td><code>real-blue-950</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#171C4F" title="#171C4F"></span></td>
+    <td><code>#171C4F</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Avatars">
+    <td>Transaction Card > Avatars</td>
+    <td class="strong">Purple avatar text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><code>white</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Avatars">
+    <td>Transaction Card > Avatars</td>
+    <td class="strong">Teal/seaglass avatar background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#BFDDDB" title="#BFDDDB"></span></td>
+    <td><code>#BFDDDB</code></td>
+    <td><code>real-seaglass-200</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#BFDDDB" title="#BFDDDB"></span></td>
+    <td><code>#BFDDDB</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Avatars">
+    <td>Transaction Card > Avatars</td>
+    <td class="strong">Teal/seaglass avatar text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#050E3D" title="#050E3D"></span></td>
+    <td><code>#050E3D</code></td>
+    <td><code>Gray/900</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#101828" title="#101828"></span></td>
+    <td><code>#101828</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Avatars">
+    <td>Transaction Card > Avatars</td>
+    <td class="strong">Avatar overflow (+N) background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#DADADA" title="#DADADA"></span></td>
+    <td><code>#DADADA</code></td>
+    <td><code>real-grey-200</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#D1D0D0" title="#D1D0D0"></span></td>
+    <td><code>#D1D0D0</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Transaction Card > Notification Badge">
+    <td>Transaction Card > Notification Badge</td>
+    <td class="strong">Notification badge background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F84C6C" title="#F84C6C"></span></td>
+    <td><code>#F84C6C</code></td>
+    <td><code>real-red-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F74D6B" title="#F74D6B"></span></td>
+    <td><code>#F74D6B</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Transaction Card > Notification Badge">
+    <td>Transaction Card > Notification Badge</td>
+    <td class="strong">Notification badge text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><code>white</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Pagination">
+    <td>Pagination</td>
+    <td class="strong">Sticky bar background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F6F8FC" title="#F6F8FC"></span></td>
+    <td><code>#F6F8FC</code></td>
+    <td><code>real-seaglass-50</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F2F9F9" title="#F2F9F9"></span></td>
+    <td><code>#F2F9F9</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Pagination">
+    <td>Pagination</td>
+    <td class="strong">View label text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><code>real-black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Pagination">
+    <td>Pagination</td>
+    <td class="strong">Row count text (of N transactions)</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#7B7A7A" title="#7B7A7A"></span></td>
+    <td><code>#7B7A7A</code></td>
+    <td><code>real-grey-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#767676" title="#767676"></span></td>
+    <td><code>#767676</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Pagination">
+    <td>Pagination</td>
+    <td class="strong">Page size select background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><code>white</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Pagination">
+    <td>Pagination</td>
+    <td class="strong">Page size select border</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#EEEEEE" title="#EEEEEE"></span></td>
+    <td><code>#EEEEEE</code></td>
+    <td><code>real-green-50</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F1F8F4" title="#F1F8F4"></span></td>
+    <td><code>#F1F8F4</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Pagination">
+    <td>Pagination</td>
+    <td class="strong">Chevron icon</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#D2D5DB" title="#D2D5DB"></span></td>
+    <td><code>#D2D5DB</code></td>
+    <td><code>real-grey-200</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#D1D0D0" title="#D1D0D0"></span></td>
+    <td><code>#D1D0D0</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Pagination">
+    <td>Pagination</td>
+    <td class="strong">Page button text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#444444" title="#444444"></span></td>
+    <td><code>#444444</code></td>
+    <td><code>real-grey-800</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#454545" title="#454545"></span></td>
+    <td><code>#454545</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Pagination">
+    <td>Pagination</td>
+    <td class="strong">Active page button background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#EDEFF3" title="#EDEFF3"></span></td>
+    <td><code>#EDEFF3</code></td>
+    <td><code>real-green-50</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F1F8F4" title="#F1F8F4"></span></td>
+    <td><code>#F1F8F4</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Filters Modal">
+    <td>Filters Modal</td>
+    <td class="strong">Panel background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><code>white</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Filters Modal">
+    <td>Filters Modal</td>
+    <td class="strong">Panel ring (around shadow)</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#E4E4E7" title="#E4E4E7"></span></td>
+    <td><code>#E4E4E7</code></td>
+    <td><code>real-grey-100</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#E7E6E6" title="#E7E6E6"></span></td>
+    <td><code>#E7E6E6</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Filters Modal">
+    <td>Filters Modal</td>
+    <td class="strong">Clear button background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><code>white</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Filters Modal">
+    <td>Filters Modal</td>
+    <td class="strong">Clear button text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><code>real-black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Filters Modal">
+    <td>Filters Modal</td>
+    <td class="strong">Clear button border</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><code>real-black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Filters Modal">
+    <td>Filters Modal</td>
+    <td class="strong">Filters heading text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#52525B" title="#52525B"></span></td>
+    <td><code>#52525B</code></td>
+    <td><code>real-grey-700</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4F4F4F" title="#4F4F4F"></span></td>
+    <td><code>#4F4F4F</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Filters Modal">
+    <td>Filters Modal</td>
+    <td class="strong">Apply button background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><code>real-blue-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Filters Modal">
+    <td>Filters Modal</td>
+    <td class="strong">Apply button text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><code>white</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Filters Modal">
+    <td>Filters Modal</td>
+    <td class="strong">Filter row divider</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#E4E4E7" title="#E4E4E7"></span></td>
+    <td><code>#E4E4E7</code></td>
+    <td><code>real-grey-100</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#E7E6E6" title="#E7E6E6"></span></td>
+    <td><code>#E7E6E6</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Filters Modal">
+    <td>Filters Modal</td>
+    <td class="strong">Checkbox unchecked background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><code>white</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Filters Modal">
+    <td>Filters Modal</td>
+    <td class="strong">Checkbox checked background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#3B82F6" title="#3B82F6"></span></td>
+    <td><code>#3B82F6</code></td>
+    <td><code>real-blue-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Filters Modal">
+    <td>Filters Modal</td>
+    <td class="strong">Checkbox ring</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#E4E4E7" title="#E4E4E7"></span></td>
+    <td><code>#E4E4E7</code></td>
+    <td><code>real-grey-100</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#E7E6E6" title="#E7E6E6"></span></td>
+    <td><code>#E7E6E6</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Sort Dropdown">
+    <td>Sort Dropdown</td>
+    <td class="strong">Panel background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><code>white</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Sort Dropdown">
+    <td>Sort Dropdown</td>
+    <td class="strong">Panel border</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#BFC3CA" title="#BFC3CA"></span></td>
+    <td><code>#BFC3CA</code></td>
+    <td><code>real-grey-200</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#D1D0D0" title="#D1D0D0"></span></td>
+    <td><code>#D1D0D0</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Sort Dropdown">
+    <td>Sort Dropdown</td>
+    <td class="strong">Header bottom border</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#DADADA" title="#DADADA"></span></td>
+    <td><code>#DADADA</code></td>
+    <td><code>real-grey-200</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#D1D0D0" title="#D1D0D0"></span></td>
+    <td><code>#D1D0D0</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Sort Dropdown">
+    <td>Sort Dropdown</td>
+    <td class="strong">SORT BY label</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#7B7A7A" title="#7B7A7A"></span></td>
+    <td><code>#7B7A7A</code></td>
+    <td><code>real-grey-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#767676" title="#767676"></span></td>
+    <td><code>#767676</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Sort Dropdown">
+    <td>Sort Dropdown</td>
+    <td class="strong">Selected option check icon</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><code>real-blue-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#4967FD" title="#4967FD"></span></td>
+    <td><code>#4967FD</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Road to Success Popover (hover on ROAD TO SUCCESS)">
+    <td>Road to Success Popover (hover on ROAD TO SUCCESS)</td>
+    <td class="strong">Popover background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><code>white</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Road to Success Popover (hover on ROAD TO SUCCESS)">
+    <td>Road to Success Popover (hover on ROAD TO SUCCESS)</td>
+    <td class="strong">Popover border</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#D4D4D8" title="#D4D4D8"></span></td>
+    <td><code>#D4D4D8</code></td>
+    <td><code>real-grey-200</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#D1D0D0" title="#D1D0D0"></span></td>
+    <td><code>#D1D0D0</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Road to Success Popover (hover on ROAD TO SUCCESS)">
+    <td>Road to Success Popover (hover on ROAD TO SUCCESS)</td>
+    <td class="strong">Heading text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#3E3F3C" title="#3E3F3C"></span></td>
+    <td><code>#3E3F3C</code></td>
+    <td><code>real-grey-900</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#3D3C3C" title="#3D3C3C"></span></td>
+    <td><code>#3D3C3C</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Road to Success Popover (hover on ROAD TO SUCCESS)">
+    <td>Road to Success Popover (hover on ROAD TO SUCCESS)</td>
+    <td class="strong">Close (X) button background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#B2BDC6" title="#B2BDC6"></span></td>
+    <td><code>#B2BDC6</code></td>
+    <td><code>real-grey-300</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#B0B0B0" title="#B0B0B0"></span></td>
+    <td><code>#B0B0B0</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Road to Success Popover (hover on ROAD TO SUCCESS)">
+    <td>Road to Success Popover (hover on ROAD TO SUCCESS)</td>
+    <td class="strong">Close (X) button icon</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><code>white</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Road to Success Popover (hover on ROAD TO SUCCESS)">
+    <td>Road to Success Popover (hover on ROAD TO SUCCESS)</td>
+    <td class="strong">Vertical timeline connector</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#D4D4D8" title="#D4D4D8"></span></td>
+    <td><code>#D4D4D8</code></td>
+    <td><code>real-grey-200</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#D1D0D0" title="#D1D0D0"></span></td>
+    <td><code>#D1D0D0</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Road to Success Popover (hover on ROAD TO SUCCESS)">
+    <td>Road to Success Popover (hover on ROAD TO SUCCESS)</td>
+    <td class="strong">Step circle background (completed)</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#E4E4E7" title="#E4E4E7"></span></td>
+    <td><code>#E4E4E7</code></td>
+    <td><code>real-grey-100</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#E7E6E6" title="#E7E6E6"></span></td>
+    <td><code>#E7E6E6</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Road to Success Popover (hover on ROAD TO SUCCESS)">
+    <td>Road to Success Popover (hover on ROAD TO SUCCESS)</td>
+    <td class="strong">Step checkmark icon</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#20B575" title="#20B575"></span></td>
+    <td><code>#20B575</code></td>
+    <td><code>real-green-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#439775" title="#439775"></span></td>
+    <td><code>#439775</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Road to Success Popover (hover on ROAD TO SUCCESS)">
+    <td>Road to Success Popover (hover on ROAD TO SUCCESS)</td>
+    <td class="strong">Date/timestamp text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#71717A" title="#71717A"></span></td>
+    <td><code>#71717A</code></td>
+    <td><code>real-grey-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#767676" title="#767676"></span></td>
+    <td><code>#767676</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Road to Success Popover (hover on ROAD TO SUCCESS)">
+    <td>Road to Success Popover (hover on ROAD TO SUCCESS)</td>
+    <td class="strong">Subtitle text (Marked as completed by ...)</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#71717A" title="#71717A"></span></td>
+    <td><code>#71717A</code></td>
+    <td><code>real-grey-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#767676" title="#767676"></span></td>
+    <td><code>#767676</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-miss" data-status="Not in DS — needs add" data-section="Road to Success Popover (hover on ROAD TO SUCCESS)">
+    <td>Road to Success Popover (hover on ROAD TO SUCCESS)</td>
+    <td class="strong">Toggle switch (ON state)</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#05C3F9" title="#05C3F9"></span></td>
+    <td><code>#05C3F9</code></td>
+    <td><span class="missing">—</span></td>
+    <td class="cell-swatch"><span class="swatch swatch-empty"></span></td>
+    <td></td>
+    <td><span class="badge badge-miss">Not in DS</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Road to Success Popover (hover on ROAD TO SUCCESS)">
+    <td>Road to Success Popover (hover on ROAD TO SUCCESS)</td>
+    <td class="strong">Toggle switch (OFF state)</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#E4E4E7" title="#E4E4E7"></span></td>
+    <td><code>#E4E4E7</code></td>
+    <td><code>real-grey-100</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#E7E6E6" title="#E7E6E6"></span></td>
+    <td><code>#E7E6E6</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Road to Success Popover (hover on ROAD TO SUCCESS)">
+    <td>Road to Success Popover (hover on ROAD TO SUCCESS)</td>
+    <td class="strong">Toggle switch thumb</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><code>white</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Checklist Popover (hover on CHECKLIST)">
+    <td>Checklist Popover (hover on CHECKLIST)</td>
+    <td class="strong">Popover background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><code>white</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Checklist Popover (hover on CHECKLIST)">
+    <td>Checklist Popover (hover on CHECKLIST)</td>
+    <td class="strong">Popover border</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#D4D4D8" title="#D4D4D8"></span></td>
+    <td><code>#D4D4D8</code></td>
+    <td><code>real-grey-200</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#D1D0D0" title="#D1D0D0"></span></td>
+    <td><code>#D1D0D0</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Checklist Popover (hover on CHECKLIST)">
+    <td>Checklist Popover (hover on CHECKLIST)</td>
+    <td class="strong">Heading text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#3E3F3C" title="#3E3F3C"></span></td>
+    <td><code>#3E3F3C</code></td>
+    <td><code>real-grey-900</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#3D3C3C" title="#3D3C3C"></span></td>
+    <td><code>#3D3C3C</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Checklist Popover (hover on CHECKLIST)">
+    <td>Checklist Popover (hover on CHECKLIST)</td>
+    <td class="strong">Close (X) button background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#B2BDC6" title="#B2BDC6"></span></td>
+    <td><code>#B2BDC6</code></td>
+    <td><code>real-grey-300</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#B0B0B0" title="#B0B0B0"></span></td>
+    <td><code>#B0B0B0</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Checklist Popover (hover on CHECKLIST)">
+    <td>Checklist Popover (hover on CHECKLIST)</td>
+    <td class="strong">Item row divider</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#E4E4E7" title="#E4E4E7"></span></td>
+    <td><code>#E4E4E7</code></td>
+    <td><code>real-grey-100</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#E7E6E6" title="#E7E6E6"></span></td>
+    <td><code>#E7E6E6</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Checklist Popover (hover on CHECKLIST)">
+    <td>Checklist Popover (hover on CHECKLIST)</td>
+    <td class="strong">Required label text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FF617F" title="#FF617F"></span></td>
+    <td><code>#FF617F</code></td>
+    <td><code>real-red-400</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FF6E85" title="#FF6E85"></span></td>
+    <td><code>#FF6E85</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Checklist Popover (hover on CHECKLIST)">
+    <td>Checklist Popover (hover on CHECKLIST)</td>
+    <td class="strong">Optional label text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#3E3F3C" title="#3E3F3C"></span></td>
+    <td><code>#3E3F3C</code></td>
+    <td><code>real-grey-900</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#3D3C3C" title="#3D3C3C"></span></td>
+    <td><code>#3D3C3C</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Checklist Popover (hover on CHECKLIST)">
+    <td>Checklist Popover (hover on CHECKLIST)</td>
+    <td class="strong">Due date text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#A1A1AA" title="#A1A1AA"></span></td>
+    <td><code>#A1A1AA</code></td>
+    <td><code>slate-400</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#94A3B8" title="#94A3B8"></span></td>
+    <td><code>#94A3B8</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Checklist Popover (hover on CHECKLIST)">
+    <td>Checklist Popover (hover on CHECKLIST)</td>
+    <td class="strong">Revision Requested badge background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FEF2F5" title="#FEF2F5"></span></td>
+    <td><code>#FEF2F5</code></td>
+    <td><code>real-red-50</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFF2F2" title="#FFF2F2"></span></td>
+    <td><code>#FFF2F2</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Checklist Popover (hover on CHECKLIST)">
+    <td>Checklist Popover (hover on CHECKLIST)</td>
+    <td class="strong">Revision Requested badge text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F84C6C" title="#F84C6C"></span></td>
+    <td><code>#F84C6C</code></td>
+    <td><code>real-red-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F74D6B" title="#F74D6B"></span></td>
+    <td><code>#F74D6B</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Checklist Popover (hover on CHECKLIST)">
+    <td>Checklist Popover (hover on CHECKLIST)</td>
+    <td class="strong">Revision Requested badge icon</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F84C6C" title="#F84C6C"></span></td>
+    <td><code>#F84C6C</code></td>
+    <td><code>real-red-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F74D6B" title="#F74D6B"></span></td>
+    <td><code>#F74D6B</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Checklist Popover (hover on CHECKLIST)">
+    <td>Checklist Popover (hover on CHECKLIST)</td>
+    <td class="strong">Accepted badge background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#E9F8F1" title="#E9F8F1"></span></td>
+    <td><code>#E9F8F1</code></td>
+    <td><code>real-green-50</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F1F8F4" title="#F1F8F4"></span></td>
+    <td><code>#F1F8F4</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Checklist Popover (hover on CHECKLIST)">
+    <td>Checklist Popover (hover on CHECKLIST)</td>
+    <td class="strong">Accepted badge text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#439775" title="#439775"></span></td>
+    <td><code>#439775</code></td>
+    <td><code>real-green-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#439775" title="#439775"></span></td>
+    <td><code>#439775</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Checklist Popover (hover on CHECKLIST)">
+    <td>Checklist Popover (hover on CHECKLIST)</td>
+    <td class="strong">Accepted badge icon</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#439775" title="#439775"></span></td>
+    <td><code>#439775</code></td>
+    <td><code>real-green-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#439775" title="#439775"></span></td>
+    <td><code>#439775</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Requires Attention Popover (hover on alert icon)">
+    <td>Requires Attention Popover (hover on alert icon)</td>
+    <td class="strong">Popover background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><code>white</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Requires Attention Popover (hover on alert icon)">
+    <td>Requires Attention Popover (hover on alert icon)</td>
+    <td class="strong">Header bottom border</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#EEEEEE" title="#EEEEEE"></span></td>
+    <td><code>#EEEEEE</code></td>
+    <td><code>real-green-50</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F1F8F4" title="#F1F8F4"></span></td>
+    <td><code>#F1F8F4</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Requires Attention Popover (hover on alert icon)">
+    <td>Requires Attention Popover (hover on alert icon)</td>
+    <td class="strong">Alert icon</td>
+    <td>Icon color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F84C6C" title="#F84C6C"></span></td>
+    <td><code>#F84C6C</code></td>
+    <td><code>real-red-500</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F74D6B" title="#F74D6B"></span></td>
+    <td><code>#F74D6B</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Requires Attention Popover (hover on alert icon)">
+    <td>Requires Attention Popover (hover on alert icon)</td>
+    <td class="strong">Heading text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><code>real-black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Requires Attention Popover (hover on alert icon)">
+    <td>Requires Attention Popover (hover on alert icon)</td>
+    <td class="strong">Body text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><code>real-black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Compliance Verified Tooltip (hover on green check)">
+    <td>Compliance Verified Tooltip (hover on green check)</td>
+    <td class="strong">Tooltip background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><code>white</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Compliance Verified Tooltip (hover on green check)">
+    <td>Compliance Verified Tooltip (hover on green check)</td>
+    <td class="strong">Tooltip border</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><code>real-black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Compliance Verified Tooltip (hover on green check)">
+    <td>Compliance Verified Tooltip (hover on green check)</td>
+    <td class="strong">Tooltip text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#000000" title="#000000"></span></td>
+    <td><code>#000000</code></td>
+    <td><code>black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#000000" title="#000000"></span></td>
+    <td><code>#000000</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Power Audit Tooltip (hover on lightning icon)">
+    <td>Power Audit Tooltip (hover on lightning icon)</td>
+    <td class="strong">Tooltip background</td>
+    <td>Background color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><code>white</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#FFFFFF" title="#FFFFFF"></span></td>
+    <td><code>#FFFFFF</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Power Audit Tooltip (hover on lightning icon)">
+    <td>Power Audit Tooltip (hover on lightning icon)</td>
+    <td class="strong">Tooltip border</td>
+    <td>Border color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><code>real-black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-match" data-status="Match" data-section="Power Audit Tooltip (hover on lightning icon)">
+    <td>Power Audit Tooltip (hover on lightning icon)</td>
+    <td class="strong">Tooltip text</td>
+    <td>Text color</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><code>real-black</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#1D1D1D" title="#1D1D1D"></span></td>
+    <td><code>#1D1D1D</code></td>
+    <td><span class="badge badge-match">Match</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Hover States (generic)">
+    <td>Hover States (generic)</td>
+    <td class="strong">Generic button hover bg (variant A)</td>
+    <td>Background color (hover)</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F8F8F8" title="#F8F8F8"></span></td>
+    <td><code>#F8F8F8</code></td>
+    <td><code>real-grey-50</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F6F5F5" title="#F6F5F5"></span></td>
+    <td><code>#F6F5F5</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr>
+<tr class="r-close" data-status="Mapped to closest" data-section="Hover States (generic)">
+    <td>Hover States (generic)</td>
+    <td class="strong">Pagination button hover bg</td>
+    <td>Background color (hover)</td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F6F8FC" title="#F6F8FC"></span></td>
+    <td><code>#F6F8FC</code></td>
+    <td><code>real-seaglass-50</code></td>
+    <td class="cell-swatch"><span class="swatch" style="background:#F2F9F9" title="#F2F9F9"></span></td>
+    <td><code>#F2F9F9</code></td>
+    <td><span class="badge badge-close">Mapped</span></td>
+    <td class="muted-small"></td>
+  </tr></tbody>
+  </table>
+</div>
+<div class="footer" id="rowCount">199 rows shown</div>
+
+<script>
+  const tbody = document.getElementById('tbody');
+  const rowCountEl = document.getElementById('rowCount');
+  const allRows = Array.from(tbody.querySelectorAll('tr'));
+  let activeFilter = 'all';
+  let activeSection = 'all';
+  let activeSearch = '';
+
+  function applyFilters() {
+    let visible = 0;
+    allRows.forEach(tr => {
+      let show = true;
+      const status = tr.dataset.status;
+      const section = tr.dataset.section;
+      const text = tr.innerText.toLowerCase();
+      if (activeFilter === 'match' && status !== 'Match') show = false;
+      if (activeFilter === 'close' && status !== 'Mapped to closest') show = false;
+      if (activeFilter === 'miss' && status !== 'Not in DS — needs add') show = false;
+      if (activeSection !== 'all' && section !== activeSection) show = false;
+      if (activeSearch && !text.includes(activeSearch)) show = false;
+      tr.classList.toggle('hidden', !show);
+      if (show) visible++;
+    });
+    rowCountEl.textContent = visible + ' rows shown';
+  }
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter = btn.dataset.f;
+      applyFilters();
+    });
+  });
+
+  document.getElementById('sectionSelect').addEventListener('change', e => {
+    activeSection = e.target.value;
+    applyFilters();
+  });
+
+  document.getElementById('searchInput').addEventListener('input', e => {
+    activeSearch = e.target.value.toLowerCase().trim();
+    applyFilters();
+  });
+
+  // Sort: map header column index to tbody cell index
+  // Cells: [0 Section, 1 Component, 2 Property, 3 swatch, 4 hex, 5 token, 6 swatch, 7 hex, 8 status, 9 visible]
+  let sortState = { col: null, dir: 'asc' };
+  document.querySelectorAll('thead th[data-col]').forEach(th => {
+    th.addEventListener('click', () => {
+      const col = parseInt(th.dataset.col);
+      const dir = sortState.col === col && sortState.dir === 'asc' ? 'desc' : 'asc';
+      sortState = { col, dir };
+      document.querySelectorAll('thead th').forEach(h => { h.classList.remove('sorted-asc', 'sorted-desc'); });
+      th.classList.add(dir === 'asc' ? 'sorted-asc' : 'sorted-desc');
+      const sorted = allRows.slice().sort((a, b) => {
+        const av = (a.cells[col]?.innerText || '').trim().toLowerCase();
+        const bv = (b.cells[col]?.innerText || '').trim().toLowerCase();
+        if (av < bv) return dir === 'asc' ? -1 : 1;
+        if (av > bv) return dir === 'asc' ? 1 : -1;
+        return 0;
+      });
+      tbody.innerHTML = '';
+      sorted.forEach(r => tbody.appendChild(r));
+    });
+  });
+</script>
+</body>
+</html>
