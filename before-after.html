@@ -1,0 +1,989 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Color Audit — Before/After Visual</title>
+<style>
+  :root {
+    --bg: #FAFAFA;
+    --card: #FFFFFF;
+    --text: #1D1D1D;
+    --muted: #767676;
+    --border: #E7E6E6;
+    --before-bg: #FFF8F8;
+    --after-bg: #F4FBF7;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.45;
+    padding: 0 0 64px;
+  }
+  /* Top nav */
+  .topnav {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .topnav h1 { margin: 0; font-size: 16px; font-weight: 600; }
+  .topnav .links { margin-left: auto; display: flex; gap: 8px; }
+  .topnav a {
+    text-decoration: none;
+    color: var(--text);
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+  .topnav a:hover { background: #F6F8FC; }
+  .topnav a.active { background: var(--text); color: white; border-color: var(--text); }
+  /* Intro */
+  .intro {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+  }
+  .intro p { margin: 6px 0; color: var(--muted); font-size: 13px; max-width: 800px; }
+  .legend {
+    display: flex; gap: 16px; margin-top: 10px;
+    font-size: 11px; color: var(--muted);
+    align-items: center;
+  }
+  .legend .chip {
+    display: inline-block; width: 14px; height: 14px; border-radius: 3px;
+    border: 1px solid rgba(0,0,0,0.1); vertical-align: middle; margin-right: 6px;
+  }
+  .legend .chip.before { background: var(--before-bg); }
+  .legend .chip.after { background: var(--after-bg); }
+
+  /* Section card */
+  section.comp {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin: 16px 24px;
+    padding: 18px 22px;
+  }
+  section.comp h2 {
+    margin: 0 0 4px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  section.comp .desc { color: var(--muted); font-size: 12px; margin: 0 0 16px; }
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .compare > div {
+    padding: 20px 24px;
+    min-height: 80px;
+  }
+  .compare .before-pane { background: var(--before-bg); border-right: 1px solid var(--border); }
+  .compare .after-pane { background: var(--after-bg); }
+  .compare h3 {
+    margin: 0 0 12px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .changes {
+    margin-top: 14px;
+    background: #FAFAFA;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+  .changes b { font-weight: 600; color: var(--text); }
+  .changes ul { margin: 4px 0 0; padding-left: 18px; }
+  .changes li { margin: 2px 0; }
+  .changes code {
+    font-family: 'SF Mono', Menlo, Monaco, monospace;
+    font-size: 11px;
+    background: rgba(0,0,0,0.05);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  /* ================= COMPONENT STYLES ================= */
+  /* Two palette wrappers: .before (current) and .after (real-ui-mapped) */
+
+  /* Default values come from .before; .after overrides */
+  .before {
+    --primary: #629BF8;            /* sub-tab active blue */
+    --primary-new: #4967FD;        /* but for buttons etc, current is #4967FD */
+    --primary-text: #FFFFFF;
+    --inactive-bg: #EEEEEE;
+    --inactive-text: #615B56;
+    --tab-active-text: #1D1D1D;
+    --tab-active-underline: #4967FD;
+    --tab-inactive-text: #7B7A7A;
+    --field-label: #7A8496;
+    --field-value: #1D1D1D;
+    --card-bg: #FFFFFF;
+    --card-border: #E4E4E7;
+    --card-divider: #EEEEEE;
+    --address-text: #1D1D1D;
+    --status-burgundy: #731A3A;
+    --status-orange: #E26811;
+    --status-yellow: #C98B11;
+    --status-blue: #4967FD;
+    --status-green: #439775;
+    --status-red: #F84C6C;
+    --status-gray: #7B7A7A;
+    --type-sale: #050E3D;
+    --type-lease: #003036;
+    --type-referral: #731A3A;
+    --prop-res-bg: #F6F5F5; --prop-res-text: #454545; --prop-res-border: #E7E6E6;
+    --prop-com-bg: #EDF4FF; --prop-com-text: #2632AD; --prop-com-border: #DDEBFF;
+    --prop-condo-bg: #FFFBEB; --prop-condo-text: #92400E; --prop-condo-border: #FEF3C7;
+    --prop-mobile-bg: #F1F8F4; --prop-mobile-text: #1E4738; --prop-mobile-border: #DCEFE4;
+    --code-pill-bg: #F6F8FC; --code-pill-border: #F2F2F4;
+    --action-btn-bg: #F2F2F4;
+    --action-power: #F84C6C;
+    --action-check: #439775;
+    --avatar-purple-bg: #321268;
+    --avatar-teal-bg: #BFDDDB; --avatar-teal-text: #050E3D;
+    --avatar-overflow: #DADADA;
+    --button-secondary-border: #DADADA; --button-secondary-text: #615B56;
+    --primary-blue-button-bg: #4967FD;
+    --notification-bg: #F84C6C;
+    --pagination-bg: #F6F8FC;
+    --page-button-text: #444444;
+    --page-active-bg: #EDEFF3;
+    --row-count-text: #7B7A7A;
+    --view-toggle-bg: rgba(59,130,246,0.1);
+    --view-toggle-icon: #3B82F6;
+    --search-icon: #3B82F6;
+    --breadcrumb-active: #3E3F3C;
+    --breadcrumb-inactive: #A1A1AA;
+  }
+  .after {
+    --primary: #4967FD;            /* real-blue-500 */
+    --primary-new: #4967FD;
+    --primary-text: #FFFFFF;
+    --inactive-bg: #D1D0D0;        /* real-grey-200 */
+    --inactive-text: #5D5D5D;      /* real-grey-600 */
+    --tab-active-text: #1D1D1D;
+    --tab-active-underline: #4967FD;
+    --tab-inactive-text: #767676;  /* real-grey-500 */
+    --field-label: #888888;        /* real-grey-400 */
+    --field-value: #1D1D1D;        /* real-black */
+    --card-bg: #FFFFFF;
+    --card-border: #E7E6E6;        /* real-grey-100 */
+    --card-divider: #E7E6E6;
+    --address-text: #1D1D1D;
+    --status-burgundy: #8A1238;    /* real-red-900 */
+    --status-orange: #D97706;      /* amber-600 (close to #E26811) */
+    --status-yellow: #B45309;      /* amber-700 (close to #C98B11) */
+    --status-blue: #4967FD;        /* real-blue-500 */
+    --status-green: #439775;       /* real-green-500 — already match */
+    --status-red: #F74D6B;         /* real-red-500 */
+    --status-gray: #767676;        /* real-grey-500 */
+    --type-sale: #171C4F;          /* real-blue-950 */
+    --type-lease: #1A3A30;         /* real-green-900 */
+    --type-referral: #8A1238;      /* real-red-900 */
+    --prop-res-bg: #F6F5F5; --prop-res-text: #454545; --prop-res-border: #E7E6E6;        /* real-grey 50/800/100 */
+    --prop-com-bg: #EDF4FF; --prop-com-text: #2632AD; --prop-com-border: #DDEBFF;        /* real-blue 50/800/100 */
+    --prop-condo-bg: #FFFBEB; --prop-condo-text: #92400E; --prop-condo-border: #FEF3C7;  /* amber 50/800/100 */
+    --prop-mobile-bg: #F1F8F4; --prop-mobile-text: #1E4738; --prop-mobile-border: #DCEFE4; /* real-green 50/800/100 */
+    --code-pill-bg: #F6F5F5; --code-pill-border: #E7E6E6;
+    --action-btn-bg: #E7E6E6;      /* real-grey-100 */
+    --action-power: #F74D6B;       /* real-red-500 */
+    --action-check: #439775;       /* real-green-500 */
+    --avatar-purple-bg: #171C4F;   /* real-blue-950 (no purple in DS) */
+    --avatar-teal-bg: #BFDDDB; --avatar-teal-text: #171C4F;
+    --avatar-overflow: #D1D0D0;    /* real-grey-200 */
+    --button-secondary-border: #D1D0D0; --button-secondary-text: #5D5D5D;
+    --primary-blue-button-bg: #4967FD;
+    --notification-bg: #F74D6B;
+    --pagination-bg: #F2F9F9;      /* real-seaglass-50 */
+    --page-button-text: #454545;
+    --page-active-bg: #E7E6E6;
+    --row-count-text: #767676;
+    --view-toggle-bg: rgba(73,103,253,0.1);   /* real-blue-500 / 10% */
+    --view-toggle-icon: #4967FD;
+    --search-icon: #4967FD;
+    --breadcrumb-active: #1D1D1D;
+    --breadcrumb-inactive: #888888;
+  }
+
+  /* Sub-tab pills */
+  .subtabs {
+    display: inline-flex;
+    gap: 8px;
+  }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 20px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: default;
+    white-space: nowrap;
+  }
+  .pill.active { background: var(--primary); color: var(--primary-text); }
+  .pill.inactive { background: var(--inactive-bg); color: var(--inactive-text); }
+
+  /* Tabs */
+  .tabs {
+    display: inline-flex;
+    gap: 24px;
+    border-bottom: 2px solid #F2F2F4;
+    padding: 0 8px;
+  }
+  .tab {
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--tab-inactive-text);
+    margin-bottom: -2px;
+    border-bottom: 2px solid transparent;
+  }
+  .tab.active {
+    color: var(--tab-active-text);
+    border-bottom-color: var(--tab-active-underline);
+  }
+
+  /* Status pills */
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 4px 0;
+  }
+  .status-pill::before {
+    content: '';
+    display: inline-block;
+    width: 16px; height: 16px;
+    background: currentColor;
+    -webkit-mask: var(--icon, none) center / contain no-repeat;
+            mask: var(--icon, none) center / contain no-repeat;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .status-pill.dot::before {
+    -webkit-mask: none; mask: none;
+    border-radius: 50%;
+    width: 8px; height: 8px;
+    margin-right: 2px;
+  }
+  .status-pill.burgundy { color: var(--status-burgundy); }
+  .status-pill.orange { color: var(--status-orange); }
+  .status-pill.yellow { color: var(--status-yellow); }
+  .status-pill.blue { color: var(--status-blue); }
+  .status-pill.green { color: var(--status-green); }
+  .status-pill.red { color: var(--status-red); }
+  .status-pill.gray { color: var(--status-gray); }
+  .status-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px 24px;
+  }
+
+  /* Type tags */
+  .type-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .type-tag.sale { color: var(--type-sale); }
+  .type-tag.lease { color: var(--type-lease); }
+  .type-tag.referral { color: var(--type-referral); }
+  .type-tag::before {
+    content: '🏠';
+    font-size: 14px;
+  }
+  .type-tag.lease::before { content: '🗝️'; }
+  .type-tag.referral::before { content: '🤝'; }
+
+  /* Property type pills */
+  .prop-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    border: 1px solid;
+  }
+  .prop-pill.residential { background: var(--prop-res-bg); color: var(--prop-res-text); border-color: var(--prop-res-border); }
+  .prop-pill.commercial { background: var(--prop-com-bg); color: var(--prop-com-text); border-color: var(--prop-com-border); }
+  .prop-pill.condo { background: var(--prop-condo-bg); color: var(--prop-condo-text); border-color: var(--prop-condo-border); }
+  .prop-pill.mobile { background: var(--prop-mobile-bg); color: var(--prop-mobile-text); border-color: var(--prop-mobile-border); }
+  .prop-pill-row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: default;
+    white-space: nowrap;
+    border: 1px solid transparent;
+  }
+  .btn-primary { background: var(--primary-blue-button-bg); color: white; }
+  .btn-outline { color: var(--primary-blue-button-bg); border-color: var(--primary-blue-button-bg); background: white; }
+  .btn-secondary { color: var(--button-secondary-text); border-color: var(--button-secondary-border); background: white; }
+  .button-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .view-toggle {
+    display: inline-flex;
+    background: var(--view-toggle-bg);
+    color: var(--view-toggle-icon);
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+  }
+
+  /* Avatars */
+  .avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 600;
+    color: white;
+    border: 2px solid white;
+  }
+  .avatar.purple { background: var(--avatar-purple-bg); }
+  .avatar.teal { background: var(--avatar-teal-bg); color: var(--avatar-teal-text); }
+  .avatar.overflow { background: var(--avatar-overflow); color: var(--field-value); }
+  .avatar-stack { display: inline-flex; }
+  .avatar-stack .avatar + .avatar { margin-left: -6px; }
+
+  /* Notification badge */
+  .notif-badge {
+    display: inline-flex; min-width: 18px; height: 18px; padding: 0 5px;
+    border-radius: 999px; background: var(--notification-bg); color: white;
+    font-size: 11px; font-weight: 600; align-items: center; justify-content: center;
+  }
+
+  /* Action icon button */
+  .action-btn {
+    display: inline-flex;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--action-btn-bg);
+    align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .action-btn.power { color: var(--action-power); }
+  .action-btn.check { color: var(--action-check); }
+
+  /* Transaction card */
+  .txn-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    max-width: 100%;
+  }
+  .txn-header {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    padding-bottom: 10px; border-bottom: 1px solid var(--card-divider);
+  }
+  .txn-body {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 16px;
+    padding-top: 12px;
+  }
+  .txn-field-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--field-label);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+  .txn-field-value {
+    font-size: 13px;
+    color: var(--field-value);
+    font-weight: 300;
+  }
+  .road-to-success-block {
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .road-to-success-label {
+    font-size: 11px; font-weight: 600; color: var(--field-label); text-transform: uppercase;
+  }
+  .progress-bar {
+    width: 62px; height: 8px;
+    background: #F2F2F4;
+    border-radius: 4px; overflow: hidden;
+  }
+  .after .progress-bar { background: #E7E6E6; }
+  .progress-fill {
+    height: 100%;
+    background: var(--field-label);
+    width: 50%;
+  }
+  .checklist-block {
+    font-size: 11px; font-weight: 600; color: var(--field-label); text-transform: uppercase;
+  }
+  .checklist-block strong { color: #1C244E; }
+  .after .checklist-block strong { color: #171C4F; }
+  .code-pill {
+    background: var(--code-pill-bg);
+    border: 1px solid var(--code-pill-border);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--address-text);
+  }
+  .address-row {
+    display: flex; align-items: center; gap: 8px;
+    margin: 12px 0;
+  }
+  .address-pin { color: var(--field-label); }
+  .address-text { color: var(--address-text); font-size: 13px; }
+
+  /* Filter button + sort dropdown */
+  .filter-bar {
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  }
+  .divider-pipe {
+    width: 1px; height: 24px; background: var(--button-secondary-border);
+  }
+  .sort-dropdown {
+    background: white;
+    border: 1px solid #D2D5DB;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 13px;
+    display: inline-flex; gap: 6px; align-items: center;
+  }
+  .after .sort-dropdown { border-color: #D1D0D0; }
+  .sort-dropdown .label { color: #7B7A7A; }
+  .after .sort-dropdown .label { color: #767676; }
+  .sort-dropdown .value { color: #1D1D1D; font-weight: 500; }
+
+  /* Pagination */
+  .pagination {
+    display: flex; gap: 8px; align-items: center;
+    background: var(--pagination-bg);
+    padding: 10px 16px;
+    border-radius: 8px;
+  }
+  .page-btn {
+    padding: 4px 10px; border-radius: 4px;
+    color: var(--page-button-text);
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .page-btn.active { background: var(--page-active-bg); }
+  .row-count {
+    font-size: 13px;
+    color: var(--row-count-text);
+  }
+  .row-count strong { color: #1D1D1D; }
+
+  /* Bigger swatch row at top */
+  .palette-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+  }
+  .swatch-card {
+    display: flex; align-items: center; gap: 10px;
+    background: white; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px;
+  }
+  .swatch-card .sw {
+    width: 32px; height: 32px; border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.1); flex-shrink: 0;
+  }
+  .swatch-card .info { font-size: 12px; }
+  .swatch-card code { font-family: 'SF Mono', Menlo, Monaco, monospace; font-size: 11px; }
+
+  /* helpers */
+  .row { display: flex; flex-wrap: wrap; gap: 24px; align-items: center; }
+</style>
+</head>
+<body>
+<div class="topnav">
+  <h1>Color Audit — Visual</h1>
+  <div class="links">
+    <a href="index.html">Audit Table</a>
+    <a href="before-after.html" class="active">Before / After</a>
+  </div>
+</div>
+
+<div class="intro">
+  <p><b>Visual comparison</b> of the most-viewed components on the transaction list page. Each block shows the component as it renders <b>today</b> on play (left, current colors) and how it would look with the proposed <b>Real UI 2025</b> mapping (right).</p>
+  <div class="legend">
+    <span><span class="chip before"></span>Before — current colors on play</span>
+    <span><span class="chip after"></span>After — mapped to Real UI 2025</span>
+  </div>
+</div>
+
+<!-- Sub-Tab Pills (biggest stray) -->
+<section class="comp">
+  <h2>1. Sub-tab pills</h2>
+  <p class="desc">The Active / Closed / Terminated pill row. The active pill is the single biggest stray on the page — currently using <code>avatar-blue-400</code> instead of the primary blue.</p>
+  <div class="compare">
+    <div class="before-pane before">
+      <h3>Before (current)</h3>
+      <div class="subtabs">
+        <div class="pill active">Active (109,879)</div>
+        <div class="pill inactive">Closed (8,686)</div>
+        <div class="pill inactive">Terminated (59,506)</div>
+      </div>
+    </div>
+    <div class="after-pane after">
+      <h3>After (Real UI)</h3>
+      <div class="subtabs">
+        <div class="pill active">Active (109,879)</div>
+        <div class="pill inactive">Closed (8,686)</div>
+        <div class="pill inactive">Terminated (59,506)</div>
+      </div>
+    </div>
+  </div>
+  <div class="changes">
+    <b>Changes:</b>
+    <ul>
+      <li>Active pill bg: <code>#629BF8</code> → <code>real-blue-500 (#4967FD)</code></li>
+      <li>Inactive pill bg: <code>#EEEEEE</code> → <code>real-grey-200 (#D1D0D0)</code></li>
+      <li>Inactive pill text: <code>#615B56</code> → <code>real-grey-600 (#5D5D5D)</code></li>
+    </ul>
+  </div>
+</section>
+
+<!-- Tabs -->
+<section class="comp">
+  <h2>2. Main tabs</h2>
+  <p class="desc">All / Sale / Lease / Referrals tabs. Active tab is underlined with the primary blue.</p>
+  <div class="compare">
+    <div class="before-pane before">
+      <h3>Before</h3>
+      <div class="tabs">
+        <div class="tab active">All</div>
+        <div class="tab">Sale</div>
+        <div class="tab">Lease</div>
+        <div class="tab">Referrals</div>
+      </div>
+    </div>
+    <div class="after-pane after">
+      <h3>After</h3>
+      <div class="tabs">
+        <div class="tab active">All</div>
+        <div class="tab">Sale</div>
+        <div class="tab">Lease</div>
+        <div class="tab">Referrals</div>
+      </div>
+    </div>
+  </div>
+  <div class="changes">
+    <b>Changes:</b>
+    <ul>
+      <li>Inactive tab text: <code>#7B7A7A</code> → <code>real-grey-500 (#767676)</code> — visually identical</li>
+      <li>Active tab text + underline: already correct (<code>#1D1D1D</code> + <code>#4967FD</code>)</li>
+    </ul>
+  </div>
+</section>
+
+<!-- Status pills -->
+<section class="comp">
+  <h2>3. Status pills (all 21 variants)</h2>
+  <p class="desc">Status pills appear next to <code>CHECKLIST</code> on each transaction card. The same text colors are used across all tabs.</p>
+  <div class="compare">
+    <div class="before-pane before">
+      <h3>Before</h3>
+      <div class="status-grid">
+        <div class="status-pill dot gray">New</div>
+        <div class="status-pill dot gray">Calculate Ledger</div>
+        <div class="status-pill dot yellow">Needs Commission Validation</div>
+        <div class="status-pill dot blue">Commission Validated</div>
+        <div class="status-pill dot gray">Ready For Commission Doc Gen</div>
+        <div class="status-pill dot orange">Commission Document Generated</div>
+        <div class="status-pill dot blue">Commission Document Approved</div>
+        <div class="status-pill dot blue">Commission Document Sent</div>
+        <div class="status-pill dot green">Approved For Closing</div>
+        <div class="status-pill dot green">Closed</div>
+        <div class="status-pill dot green">Waiting On Payment</div>
+        <div class="status-pill dot green">Payment Accepted</div>
+        <div class="status-pill dot green">Payment Scheduled</div>
+        <div class="status-pill dot green">Settled</div>
+        <div class="status-pill dot burgundy">Termination Requested</div>
+        <div class="status-pill dot red">Terminated</div>
+        <div class="status-pill dot green">Listing Active</div>
+        <div class="status-pill dot yellow">Listing In Contract</div>
+        <div class="status-pill dot gray">Listing Closed</div>
+        <div class="status-pill dot blue">Trade Record Sheet Confirmed</div>
+      </div>
+    </div>
+    <div class="after-pane after">
+      <h3>After</h3>
+      <div class="status-grid">
+        <div class="status-pill dot gray">New</div>
+        <div class="status-pill dot gray">Calculate Ledger</div>
+        <div class="status-pill dot yellow">Needs Commission Validation</div>
+        <div class="status-pill dot blue">Commission Validated</div>
+        <div class="status-pill dot gray">Ready For Commission Doc Gen</div>
+        <div class="status-pill dot orange">Commission Document Generated</div>
+        <div class="status-pill dot blue">Commission Document Approved</div>
+        <div class="status-pill dot blue">Commission Document Sent</div>
+        <div class="status-pill dot green">Approved For Closing</div>
+        <div class="status-pill dot green">Closed</div>
+        <div class="status-pill dot green">Waiting On Payment</div>
+        <div class="status-pill dot green">Payment Accepted</div>
+        <div class="status-pill dot green">Payment Scheduled</div>
+        <div class="status-pill dot green">Settled</div>
+        <div class="status-pill dot burgundy">Termination Requested</div>
+        <div class="status-pill dot red">Terminated</div>
+        <div class="status-pill dot green">Listing Active</div>
+        <div class="status-pill dot yellow">Listing In Contract</div>
+        <div class="status-pill dot gray">Listing Closed</div>
+        <div class="status-pill dot blue">Trade Record Sheet Confirmed</div>
+      </div>
+    </div>
+  </div>
+  <div class="changes">
+    <b>Changes (most are visually identical, hex shifts only):</b>
+    <ul>
+      <li>Burgundy (Termination Requested): <code>#731A3A</code> → <code>real-red-900 (#8A1238)</code></li>
+      <li>Red (Terminated): <code>#F84C6C</code> → <code>real-red-500 (#F74D6B)</code></li>
+      <li>Orange (Commission Doc Generated): <code>#E26811</code> → <code>amber-600 (#D97706)</code> — slightly more amber</li>
+      <li>Yellow (Needs Commission Validation): <code>#C98B11</code> → <code>amber-700 (#B45309)</code> — slightly more saturated</li>
+      <li>Gray: <code>#7B7A7A</code> → <code>real-grey-500 (#767676)</code> — identical to eye</li>
+      <li>Blue and Green: already match Real UI</li>
+    </ul>
+  </div>
+</section>
+
+<!-- Type tags -->
+<section class="comp">
+  <h2>4. Transaction type tags</h2>
+  <p class="desc">Sale / Lease / Internal Referral icons + labels in the card header.</p>
+  <div class="compare">
+    <div class="before-pane before">
+      <h3>Before</h3>
+      <div class="row">
+        <div class="type-tag sale">Sale</div>
+        <div class="type-tag lease">Lease</div>
+        <div class="type-tag referral">Internal Referral</div>
+      </div>
+    </div>
+    <div class="after-pane after">
+      <h3>After</h3>
+      <div class="row">
+        <div class="type-tag sale">Sale</div>
+        <div class="type-tag lease">Lease</div>
+        <div class="type-tag referral">Internal Referral</div>
+      </div>
+    </div>
+  </div>
+  <div class="changes">
+    <b>Changes:</b>
+    <ul>
+      <li>Sale: <code>#050E3D</code> → <code>real-blue-950 (#171C4F)</code></li>
+      <li>Lease: <code>#003036</code> → <code>real-green-900 (#1A3A30)</code></li>
+      <li>Internal Referral: <code>#731A3A</code> → <code>real-red-900 (#8A1238)</code></li>
+    </ul>
+  </div>
+</section>
+
+<!-- Property type pills -->
+<section class="comp">
+  <h2>5. Property type pills</h2>
+  <p class="desc">Residential / Commercial / Condo / Mobile Home labels under the address. <b>Mobile Home is the only pill already using Real UI tokens correctly</b>.</p>
+  <div class="compare">
+    <div class="before-pane before">
+      <h3>Before</h3>
+      <div class="prop-pill-row">
+        <span class="prop-pill residential">Residential</span>
+        <span class="prop-pill commercial">Commercial</span>
+        <span class="prop-pill condo">Condo</span>
+        <span class="prop-pill mobile">Mobile Home</span>
+      </div>
+    </div>
+    <div class="after-pane after">
+      <h3>After</h3>
+      <div class="prop-pill-row">
+        <span class="prop-pill residential">Residential</span>
+        <span class="prop-pill commercial">Commercial</span>
+        <span class="prop-pill condo">Condo</span>
+        <span class="prop-pill mobile">Mobile Home</span>
+      </div>
+    </div>
+  </div>
+  <div class="changes">
+    <b>Changes:</b>
+    <ul>
+      <li>All four pills already use Real UI tokens correctly. No visible difference.</li>
+      <li>Residential: real-grey 50/800/100 (match)</li>
+      <li>Commercial: real-blue 50/800/100 (match)</li>
+      <li>Condo: amber 50/800/100 (match)</li>
+      <li>Mobile Home: real-green 50/800/100 (match)</li>
+    </ul>
+  </div>
+</section>
+
+<!-- Buttons -->
+<section class="comp">
+  <h2>6. Page action buttons</h2>
+  <p class="desc">Top-right action buttons on the page header.</p>
+  <div class="compare">
+    <div class="before-pane before">
+      <h3>Before</h3>
+      <div class="button-row">
+        <div class="btn btn-secondary">⚙ Filters</div>
+        <div class="view-toggle">▦</div>
+        <div class="divider-pipe"></div>
+        <div class="btn btn-outline">+ Create Referral</div>
+        <div class="btn btn-primary">+ Add Transaction</div>
+      </div>
+    </div>
+    <div class="after-pane after">
+      <h3>After</h3>
+      <div class="button-row">
+        <div class="btn btn-secondary">⚙ Filters</div>
+        <div class="view-toggle">▦</div>
+        <div class="divider-pipe"></div>
+        <div class="btn btn-outline">+ Create Referral</div>
+        <div class="btn btn-primary">+ Add Transaction</div>
+      </div>
+    </div>
+  </div>
+  <div class="changes">
+    <b>Changes:</b>
+    <ul>
+      <li>View toggle bg: <code>#3B82F6/10%</code> (Tailwind blue) → <code>real-blue-500/10% (#4967FD/10%)</code></li>
+      <li>View toggle icon: <code>#3B82F6</code> → <code>real-blue-500 (#4967FD)</code></li>
+      <li>Filters button text + border: <code>#615B56 / #DADADA</code> → <code>real-grey-600 / real-grey-200 (#5D5D5D / #D1D0D0)</code></li>
+      <li>Add Transaction & Create Referral primary blue: already correct (<code>#4967FD</code>)</li>
+    </ul>
+  </div>
+</section>
+
+<!-- Avatars -->
+<section class="comp">
+  <h2>7. Agent avatars</h2>
+  <p class="desc">Stacked avatar circles in card body. The purple avatar bg is the only color in this audit with no Real UI equivalent — closest fallback is real-blue-950.</p>
+  <div class="compare">
+    <div class="before-pane before">
+      <h3>Before</h3>
+      <div class="avatar-stack">
+        <div class="avatar purple">TB</div>
+        <div class="avatar teal">ST</div>
+        <div class="avatar overflow">+2</div>
+      </div>
+    </div>
+    <div class="after-pane after">
+      <h3>After</h3>
+      <div class="avatar-stack">
+        <div class="avatar purple">TB</div>
+        <div class="avatar teal">ST</div>
+        <div class="avatar overflow">+2</div>
+      </div>
+    </div>
+  </div>
+  <div class="changes">
+    <b>Changes:</b>
+    <ul>
+      <li>Purple avatar bg: <code>#321268</code> → <code>real-blue-950 (#171C4F)</code> — Real UI has no purple; consider adding a purple token or keeping as off-palette accent</li>
+      <li>Teal avatar bg: <code>#BFDDDB</code> → <code>real-seaglass-200 (#BFDDDB)</code> — 100% match</li>
+      <li>Teal avatar text: <code>#050E3D</code> → <code>real-blue-950 (#171C4F)</code></li>
+      <li>Overflow bg: <code>#DADADA</code> → <code>real-grey-200 (#D1D0D0)</code></li>
+    </ul>
+  </div>
+</section>
+
+<!-- Action icons -->
+<section class="comp">
+  <h2>8. Card action icons</h2>
+  <p class="desc">Power Audit / Requires Attention / Compliance Verified / Confirmed Commission Deposit icon buttons. Plus the red notification badge (e.g. "3").</p>
+  <div class="compare">
+    <div class="before-pane before">
+      <h3>Before</h3>
+      <div class="row">
+        <div class="action-btn power">⚡</div>
+        <div class="action-btn power">⚠</div>
+        <div class="action-btn check">✓</div>
+        <div class="action-btn check">$</div>
+        <div class="notif-badge">3</div>
+      </div>
+    </div>
+    <div class="after-pane after">
+      <h3>After</h3>
+      <div class="row">
+        <div class="action-btn power">⚡</div>
+        <div class="action-btn power">⚠</div>
+        <div class="action-btn check">✓</div>
+        <div class="action-btn check">$</div>
+        <div class="notif-badge">3</div>
+      </div>
+    </div>
+  </div>
+  <div class="changes">
+    <b>Changes:</b>
+    <ul>
+      <li>Button bg: <code>#F2F2F4</code> → <code>real-grey-100 (#E7E6E6)</code></li>
+      <li>Power / Attention icon (red): <code>#F84C6C</code> → <code>real-red-500 (#F74D6B)</code></li>
+      <li>Check / Money icon (green): already correct (<code>#439775</code>)</li>
+      <li>Notification badge: <code>#F84C6C</code> → <code>real-red-500 (#F74D6B)</code></li>
+    </ul>
+  </div>
+</section>
+
+<!-- Sort + pagination -->
+<section class="comp">
+  <h2>9. Sort bar &amp; pagination</h2>
+  <p class="desc">Sort By dropdown, direction toggle, pagination row.</p>
+  <div class="compare">
+    <div class="before-pane before">
+      <h3>Before</h3>
+      <div class="row">
+        <div class="sort-dropdown"><span class="label">Sort By:</span><span class="value">Closing Date</span><span>▾</span></div>
+        <div class="pagination">
+          <span class="page-btn">‹</span>
+          <span class="page-btn active">1</span>
+          <span class="page-btn">2</span>
+          <span class="page-btn">3</span>
+          <span class="page-btn">…</span>
+          <span class="page-btn">5485</span>
+          <span class="page-btn">›</span>
+        </div>
+      </div>
+    </div>
+    <div class="after-pane after">
+      <h3>After</h3>
+      <div class="row">
+        <div class="sort-dropdown"><span class="label">Sort By:</span><span class="value">Closing Date</span><span>▾</span></div>
+        <div class="pagination">
+          <span class="page-btn">‹</span>
+          <span class="page-btn active">1</span>
+          <span class="page-btn">2</span>
+          <span class="page-btn">3</span>
+          <span class="page-btn">…</span>
+          <span class="page-btn">5485</span>
+          <span class="page-btn">›</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="changes">
+    <b>Changes:</b>
+    <ul>
+      <li>Sort dropdown border: <code>#D2D5DB</code> → <code>real-grey-200 (#D1D0D0)</code></li>
+      <li>Sort By label: <code>#7B7A7A</code> → <code>real-grey-500 (#767676)</code></li>
+      <li>Pagination bar bg: <code>#F6F8FC</code> → <code>real-seaglass-50 (#F2F9F9)</code> or real-grey-50</li>
+      <li>Active page bg: <code>#EDEFF3</code> → <code>real-grey-100 (#E7E6E6)</code></li>
+    </ul>
+  </div>
+</section>
+
+<!-- Full transaction card -->
+<section class="comp">
+  <h2>10. Full transaction card</h2>
+  <p class="desc">The hero component. Everything above assembled into a real card.</p>
+  <div class="compare" style="grid-template-columns:1fr;">
+    <div class="before-pane before">
+      <h3>Before</h3>
+      <div class="txn-card">
+        <div class="txn-header">
+          <div class="type-tag sale">Sale</div>
+          <div class="road-to-success-block">
+            <span class="road-to-success-label">Road to Success</span>
+            <span class="progress-bar"><span class="progress-fill"></span></span>
+            <span style="font-size:13px;color:var(--field-value)">50%</span>
+          </div>
+          <div class="checklist-block">CHECKLIST <strong>01</strong>/01</div>
+          <div class="status-pill dot burgundy">Termination Requested</div>
+          <div class="code-pill">QTB-9KY-OIN-FVR ⧉</div>
+          <div style="margin-left:auto;display:flex;gap:6px;align-items:center;">
+            <div class="action-btn power">⚡</div>
+            <div class="action-btn power">⚠</div>
+            <div class="action-btn check">✓</div>
+            <div style="font-size:16px;color:var(--field-label);">⌄</div>
+          </div>
+        </div>
+        <div class="address-row">
+          <span class="address-pin">📍</span>
+          <span class="address-text">101 W 2150 N, Layton, Utah 84040</span>
+          <span class="prop-pill residential">Residential</span>
+        </div>
+        <div class="txn-body">
+          <div><div class="txn-field-label">Transaction Owner</div><div class="txn-field-value">Sisu Test3</div></div>
+          <div><div class="txn-field-label">Representing</div><div class="txn-field-value">Buy Side</div></div>
+          <div><div class="txn-field-label">Closing Date</div><div class="txn-field-value">Apr 24, 2024</div></div>
+          <div><div class="txn-field-label">Sale Price</div><div class="txn-field-value">$535,000.34</div></div>
+          <div><div class="txn-field-label">Buyer</div><div class="txn-field-value">Jake Stewart</div></div>
+          <div><div class="txn-field-label">Seller</div><div class="txn-field-value">Cole Gunner</div></div>
+          <div><div class="txn-field-label">Monies</div><div class="txn-field-value">Gross Comm: $10,700</div></div>
+          <div><div class="txn-field-label">Agents</div><div class="txn-field-value"><span class="avatar-stack"><span class="avatar purple" style="width:24px;height:24px;font-size:10px;">TB</span><span class="avatar teal" style="width:24px;height:24px;font-size:10px;">ST</span><span class="avatar overflow" style="width:24px;height:24px;font-size:10px;">+2</span></span></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="after-pane after">
+      <h3>After</h3>
+      <div class="txn-card">
+        <div class="txn-header">
+          <div class="type-tag sale">Sale</div>
+          <div class="road-to-success-block">
+            <span class="road-to-success-label">Road to Success</span>
+            <span class="progress-bar"><span class="progress-fill"></span></span>
+            <span style="font-size:13px;color:var(--field-value)">50%</span>
+          </div>
+          <div class="checklist-block">CHECKLIST <strong>01</strong>/01</div>
+          <div class="status-pill dot burgundy">Termination Requested</div>
+          <div class="code-pill">QTB-9KY-OIN-FVR ⧉</div>
+          <div style="margin-left:auto;display:flex;gap:6px;align-items:center;">
+            <div class="action-btn power">⚡</div>
+            <div class="action-btn power">⚠</div>
+            <div class="action-btn check">✓</div>
+            <div style="font-size:16px;color:var(--field-label);">⌄</div>
+          </div>
+        </div>
+        <div class="address-row">
+          <span class="address-pin">📍</span>
+          <span class="address-text">101 W 2150 N, Layton, Utah 84040</span>
+          <span class="prop-pill residential">Residential</span>
+        </div>
+        <div class="txn-body">
+          <div><div class="txn-field-label">Transaction Owner</div><div class="txn-field-value">Sisu Test3</div></div>
+          <div><div class="txn-field-label">Representing</div><div class="txn-field-value">Buy Side</div></div>
+          <div><div class="txn-field-label">Closing Date</div><div class="txn-field-value">Apr 24, 2024</div></div>
+          <div><div class="txn-field-label">Sale Price</div><div class="txn-field-value">$535,000.34</div></div>
+          <div><div class="txn-field-label">Buyer</div><div class="txn-field-value">Jake Stewart</div></div>
+          <div><div class="txn-field-label">Seller</div><div class="txn-field-value">Cole Gunner</div></div>
+          <div><div class="txn-field-label">Monies</div><div class="txn-field-value">Gross Comm: $10,700</div></div>
+          <div><div class="txn-field-label">Agents</div><div class="txn-field-value"><span class="avatar-stack"><span class="avatar purple" style="width:24px;height:24px;font-size:10px;">TB</span><span class="avatar teal" style="width:24px;height:24px;font-size:10px;">ST</span><span class="avatar overflow" style="width:24px;height:24px;font-size:10px;">+2</span></span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="changes">
+    <b>Combined changes</b> — every fix from sections 1–9 applied together. Most differences are subtle (small hex shifts that are visually identical) but the cumulative effect is a card that <b>fully conforms to Real UI 2025</b> with no Tailwind defaults or legacy zen-palette colors mixed in.
+  </div>
+</section>
+
+</body>
+</html>
