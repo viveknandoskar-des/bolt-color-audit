@@ -1,0 +1,200 @@
+Page	Section	Component	Property	Current Color	Current Hex	Real UI Color Name	Real UI Hex	Status	Visible On (tabs)
+Transactions	Breadcrumb	Active page text (Home)	Text color	color: rgb(62, 63, 60)	#3E3F3C	real-grey-900	#3D3C3C	Mapped to closest	
+Transactions	Breadcrumb	Chevron separator	Icon color	fill: rgb(161, 161, 170)	#A1A1AA	slate-400	#94A3B8	Mapped to closest	
+Transactions	Breadcrumb	Inactive link text (My Transactions)	Text color	color: rgb(161, 161, 170)	#A1A1AA	slate-400	#94A3B8	Mapped to closest	
+Transactions	Global Search	Input background	Background color	background-color: rgb(255, 255, 255)	#FFFFFF	white	#FFFFFF	100% Match	
+Transactions	Global Search	Input border	Border color	border-color: rgb(210, 213, 219)	#D2D5DB	real-grey-200	#D1D0D0	Mapped to closest	
+Transactions	Global Search	Search icon	Icon color	fill: rgb(59, 130, 246)	#3B82F6	real-blue-500	#4967FD	Mapped to closest	
+Transactions	Page Header > Filters Button	Filters button background	Background color	background-color: rgb(255, 255, 255)	#FFFFFF	white	#FFFFFF	100% Match	
+Transactions	Page Header > Filters Button	Filters button text	Text color	color: rgb(97, 91, 86)	#615B56	real-grey-600	#5D5D5D	Mapped to closest	
+Transactions	Page Header > Filters Button	Filters button border	Border color	border-color: rgb(218, 218, 218)	#DADADA	real-grey-200	#D1D0D0	Mapped to closest	
+Transactions	Page Header > Filters Button	Filters button icon	Icon color	fill: rgb(97, 91, 86)	#615B56	real-grey-600	#5D5D5D	Mapped to closest	
+Transactions	Page Header > View Toggle	Active view toggle background	Background color	background-color: rgba(59, 130, 246, 0.1); (alpha)	#3B82F6/10%	real-blue-500/10%	#4967FD/10%	Mapped to closest	
+Transactions	Page Header > View Toggle	Active view toggle icon	Icon color	fill: rgb(59, 130, 246)	#3B82F6	real-blue-500	#4967FD	Mapped to closest	
+Transactions	Page Header > View Toggle	Inactive view toggle icon	Icon color	fill: rgb(29, 29, 29)	#1D1D1D	real-black	#1D1D1D	100% Match	
+Transactions	Page Header > View Toggle	Divider pipe	Text color	color: rgb(218, 218, 218)	#DADADA	real-grey-200	#D1D0D0	Mapped to closest	
+Transactions	Page Header > Create Referral Button	Create Referral text	Text color	color: rgb(73, 103, 253)	#4967FD	real-blue-500	#4967FD	100% Match	
+Transactions	Page Header > Create Referral Button	Create Referral outline (inset box-shadow)	Border color	border-color: rgb(73, 103, 253)	#4967FD	real-blue-500	#4967FD	100% Match	
+Transactions	Page Header > Create Referral Button	Create Referral plus icon	Icon color	fill: rgb(73, 103, 253)	#4967FD	real-blue-500	#4967FD	100% Match	
+Transactions	Page Header > Add Transaction Button	Add Transaction background	Background color	background-color: rgb(73, 103, 253)	#4967FD	real-blue-500	#4967FD	100% Match	
+Transactions	Page Header > Add Transaction Button	Add Transaction text	Text color	color: rgb(255, 255, 255)	#FFFFFF	white	#FFFFFF	100% Match	
+Transactions	Page Header > Add Transaction Button	Add Transaction plus icon	Icon color	fill: rgb(255, 255, 255)	#FFFFFF	white	#FFFFFF	100% Match	
+Transactions	Tabs (All / Sale / Lease / Referrals)	Active tab text	Text color	color: rgb(29, 29, 29)	#1D1D1D	real-black	#1D1D1D	100% Match	
+Transactions	Tabs (All / Sale / Lease / Referrals)	Active tab underline	Border color	border-color: rgb(73, 103, 253)	#4967FD	real-blue-500	#4967FD	100% Match	
+Transactions	Tabs (All / Sale / Lease / Referrals)	Inactive tab text	Text color	color: rgb(123, 122, 122)	#7B7A7A	real-grey-500	#767676	Mapped to closest	
+Transactions	Tabs (All / Sale / Lease / Referrals)	Tab strip bottom border	Border color	border-color: rgb(242, 242, 244)	#F2F2F4	real-grey-50	#F6F5F5	Mapped to closest	
+Transactions	Sub-Tabs (Active / Closed / Terminated)	Sub-tabs container background	Background color	background-color: rgb(246, 248, 252)	#F6F8FC	real-seaglass-50	#F2F9F9	Mapped to closest	
+Transactions	Sub-Tabs (Active / Closed / Terminated)	Active pill background	Background color	background-color: rgb(98, 155, 248)	#629BF8	real-blue-400	#7798FF	Mapped to closest	
+Transactions	Sub-Tabs (Active / Closed / Terminated)	Active pill text	Text color	color: rgb(255, 255, 255)	#FFFFFF	white	#FFFFFF	100% Match	
+Transactions	Sub-Tabs (Active / Closed / Terminated)	Inactive pill background	Background color	background-color: rgb(238, 238, 238)	#EEEEEE	real-green-50	#F1F8F4	Mapped to closest	
+Transactions	Sub-Tabs (Active / Closed / Terminated)	Inactive pill text	Text color	color: rgb(97, 91, 86)	#615B56	real-grey-600	#5D5D5D	Mapped to closest	
+Transactions	Sort Bar	Sort By label	Text color	color: rgb(123, 122, 122)	#7B7A7A	real-grey-500	#767676	Mapped to closest	
+Transactions	Sort Bar	Sort dropdown background	Background color	background-color: rgb(255, 255, 255)	#FFFFFF	white	#FFFFFF	100% Match	
+Transactions	Sort Bar	Sort dropdown border	Border color	border-color: rgb(210, 213, 219)	#D2D5DB	real-grey-200	#D1D0D0	Mapped to closest	
+Transactions	Sort Bar	Sort dropdown value text	Text color	color: rgb(29, 29, 29)	#1D1D1D	real-black	#1D1D1D	100% Match	
+Transactions	Sort Bar	Sort dropdown chevron	Icon color	fill: rgb(29, 29, 29)	#1D1D1D	real-black	#1D1D1D	100% Match	
+Transactions	Sort Bar	Sort direction button background	Background color	background-color: rgb(255, 255, 255)	#FFFFFF	white	#FFFFFF	100% Match	
+Transactions	Sort Bar	Sort direction button border	Border color	border-color: rgb(191, 195, 202)	#BFC3CA	real-grey-200	#D1D0D0	Mapped to closest	
+Transactions	Sort Bar	Expand All / Collapse All divider	Border color	border-color: rgb(168, 168, 168)	#A8A8A8	real-grey-300	#B0B0B0	Mapped to closest	
+Transactions	Sort Bar	Expand All / Collapse All link text	Text color	color: rgb(73, 103, 253)	#4967FD	real-blue-500	#4967FD	100% Match	
+Transactions	Transaction Card > Container	Card background	Background color	background-color: rgb(255, 255, 255)	#FFFFFF	white	#FFFFFF	100% Match	
+Transactions	Transaction Card > Container	Card border (default)	Border color	border-color: rgb(228, 228, 231)	#E4E4E7	real-grey-100	#E7E6E6	Mapped to closest	
+Transactions	Transaction Card > Container	Card border (hover)	Border color (hover)	border-color: rgb(122, 132, 150)	#7A8496	real-grey-400	#888888	Mapped to closest	
+Transactions	Transaction Card > Container	Card header bottom border	Border color	border-color: rgb(238, 238, 238)	#EEEEEE	real-green-50	#F1F8F4	Mapped to closest	
+Transactions	Transaction Card > Container	Expand/collapse button background	Background color	background-color: rgba(73, 103, 253, 0.1); (alpha)	#4967FD/10%	real-blue-500/10%	#4967FD/10%	100% Match	
+Transactions	Transaction Card > Container	Expand/collapse button icon	Icon color	fill: rgb(73, 103, 253)	#4967FD	real-blue-500	#4967FD	100% Match	
+Transactions	Transaction Card > Container	Vertical divider in header	Background color	background-color: rgb(238, 238, 238)	#EEEEEE	real-green-50	#F1F8F4	Mapped to closest	
+Transactions	Transaction Card > Type Tag	Sale tag text	Text color	color: rgb(5, 14, 61)	#050E3D	Gray/900	#101828	Mapped to closest	All-*, Sale-*
+Transactions	Transaction Card > Type Tag	Sale tag icon	Icon color	fill: rgb(5, 14, 61)	#050E3D	Gray/900	#101828	Mapped to closest	All-*, Sale-*
+Transactions	Transaction Card > Type Tag	Lease tag text	Text color	color: rgb(0, 48, 54)	#003036	real-green-900	#1A3A30	Mapped to closest	All-*, Lease-*
+Transactions	Transaction Card > Type Tag	Internal Referral tag text	Text color	color: rgb(115, 26, 58)	#731A3A	real-red-900	#8A1238	Mapped to closest	All-*, Referrals-*
+Transactions	Transaction Card > Progress	ROAD TO SUCCESS label	Text color	color: rgb(122, 132, 150)	#7A8496	real-grey-400	#888888	Mapped to closest	
+Transactions	Transaction Card > Progress	Progress bar track	Background color	background-color: rgb(242, 242, 244)	#F2F2F4	real-grey-50	#F6F5F5	Mapped to closest	
+Transactions	Transaction Card > Progress	Progress bar fill	Background color	background-color: rgb(122, 132, 150)	#7A8496	real-grey-400	#888888	Mapped to closest	
+Transactions	Transaction Card > Progress	Percentage text	Text color	color: rgb(29, 29, 29)	#1D1D1D	real-black	#1D1D1D	100% Match	
+Transactions	Transaction Card > Checklist	CHECKLIST label	Text color	color: rgb(122, 132, 150)	#7A8496	real-grey-400	#888888	Mapped to closest	
+Transactions	Transaction Card > Checklist	Completed count number	Text color	color: rgb(28, 36, 78)	#1C244E	real-blue-950	#171C4F	Mapped to closest	
+Transactions	Transaction Card > Status Pill	New - text	Text color	color: rgb(123, 122, 122)	#7B7A7A	real-grey-500	#767676	Mapped to closest	
+Transactions	Transaction Card > Status Pill	Calculate Ledger - text	Text color	color: rgb(123, 122, 122)	#7B7A7A	real-grey-500	#767676	Mapped to closest	
+Transactions	Transaction Card > Status Pill	Needs Commission Validation - text	Text color	color: rgb(201, 139, 17)	#C98B11	amber-600	#D97706	Mapped to closest	All - Active; Sale - Active; Lease - Active; Referrals - Active
+Transactions	Transaction Card > Status Pill	Needs Commission Validation - icon	Icon color	fill: rgb(201, 139, 17)	#C98B11	amber-600	#D97706	Mapped to closest	All - Active; Sale - Active; Lease - Active; Referrals - Active
+Transactions	Transaction Card > Status Pill	Commission Validated - text	Text color	color: rgb(73, 103, 253)	#4967FD	real-blue-500	#4967FD	100% Match	
+Transactions	Transaction Card > Status Pill	Ready For Commission Document Generation - text	Text color	color: rgb(123, 122, 122)	#7B7A7A	real-grey-500	#767676	Mapped to closest	
+Transactions	Transaction Card > Status Pill	Commission Document Generated - text	Text color	color: rgb(226, 104, 17)	#E26811	amber-600	#D97706	Mapped to closest	All - Active; Sale - Active
+Transactions	Transaction Card > Status Pill	Commission Document Generated - icon	Icon color	fill: rgb(226, 104, 17)	#E26811	amber-600	#D97706	Mapped to closest	All - Active; Sale - Active
+Transactions	Transaction Card > Status Pill	Commission Document Approved - text	Text color	color: rgb(73, 103, 253)	#4967FD	real-blue-500	#4967FD	100% Match	
+Transactions	Transaction Card > Status Pill	Commission Document Sent - text	Text color	color: rgb(73, 103, 253)	#4967FD	real-blue-500	#4967FD	100% Match	Sale - Active; Referrals - Active
+Transactions	Transaction Card > Status Pill	Approved For Closing - text	Text color	color: rgb(67, 151, 117)	#439775	real-green-500	#439775	100% Match	All - Active; Sale - Active; Lease - Active
+Transactions	Transaction Card > Status Pill	Approved For Closing - icon	Icon color	fill: rgb(67, 151, 117)	#439775	real-green-500	#439775	100% Match	All - Active; Sale - Active; Lease - Active
+Transactions	Transaction Card > Status Pill	Closed - text	Text color	color: rgb(67, 151, 117)	#439775	real-green-500	#439775	100% Match	Lease - Closed
+Transactions	Transaction Card > Status Pill	Waiting On Payment - text	Text color	color: rgb(67, 151, 117)	#439775	real-green-500	#439775	100% Match	
+Transactions	Transaction Card > Status Pill	Payment Accepted - text	Text color	color: rgb(67, 151, 117)	#439775	real-green-500	#439775	100% Match	All - Closed; Sale - Closed; Lease - Closed; Referrals - Closed
+Transactions	Transaction Card > Status Pill	Payment Scheduled - text	Text color	color: rgb(67, 151, 117)	#439775	real-green-500	#439775	100% Match	All - Closed; Sale - Closed; Lease - Closed; Referrals - Closed
+Transactions	Transaction Card > Status Pill	Settled - text	Text color	color: rgb(67, 151, 117)	#439775	real-green-500	#439775	100% Match	All - Closed; Sale - Closed; Referrals - Closed
+Transactions	Transaction Card > Status Pill	Termination Requested - text	Text color	color: rgb(115, 26, 58)	#731A3A	real-red-900	#8A1238	Mapped to closest	All - Active; Sale - Active; Referrals - Active
+Transactions	Transaction Card > Status Pill	Termination Requested - icon	Icon color	fill: rgb(115, 26, 58)	#731A3A	real-red-900	#8A1238	Mapped to closest	All - Active; Sale - Active; Referrals - Active
+Transactions	Transaction Card > Status Pill	Terminated - text	Text color	color: rgb(248, 76, 108)	#F84C6C	real-red-500	#F74D6B	Mapped to closest	All - Terminated; Sale - Terminated; Lease - Terminated; Referrals - Terminated
+Transactions	Transaction Card > Status Pill	Listing Active - text	Text color	color: rgb(67, 151, 117)	#439775	real-green-500	#439775	100% Match	
+Transactions	Transaction Card > Status Pill	Listing In Contract - text	Text color	color: rgb(201, 139, 17)	#C98B11	amber-600	#D97706	Mapped to closest	
+Transactions	Transaction Card > Status Pill	Listing Closed - text	Text color	color: rgb(123, 122, 122)	#7B7A7A	real-grey-500	#767676	Mapped to closest	
+Transactions	Transaction Card > Status Pill	Trade Record Sheet Confirmed - text	Text color	color: rgb(73, 103, 253)	#4967FD	real-blue-500	#4967FD	100% Match	All - Active; Sale - Active; Referrals - Active
+Transactions	Transaction Card > Status Pill	Trade Record Sheet Confirmed - icon	Icon color	fill: rgb(73, 103, 253)	#4967FD	real-blue-500	#4967FD	100% Match	All - Active; Sale - Active; Referrals - Active
+Transactions	Transaction Card > Transaction Code	Code pill background	Background color	background-color: rgb(246, 248, 252)	#F6F8FC	real-seaglass-50	#F2F9F9	Mapped to closest	
+Transactions	Transaction Card > Transaction Code	Code pill border	Border color	border-color: rgb(242, 242, 244)	#F2F2F4	real-grey-50	#F6F5F5	Mapped to closest	
+Transactions	Transaction Card > Transaction Code	Code text	Text color	color: rgb(29, 29, 29)	#1D1D1D	real-black	#1D1D1D	100% Match	
+Transactions	Transaction Card > Transaction Code	Copy icon	Icon color	fill: rgb(29, 29, 29)	#1D1D1D	real-black	#1D1D1D	100% Match	
+Transactions	Transaction Card > Countdown Badge (X days Y hours)	Badge border	Border color	border-color: rgb(228, 228, 231)	#E4E4E7	real-grey-100	#E7E6E6	Mapped to closest	
+Transactions	Transaction Card > Countdown Badge (X days Y hours)	Badge text	Text color	color: rgb(0, 0, 0)	#000000	black	#000000	100% Match	
+Transactions	Transaction Card > Action Icons	Action button background (default)	Background color	background-color: rgb(242, 242, 244)	#F2F2F4	real-grey-50	#F6F5F5	Mapped to closest	
+Transactions	Transaction Card > Action Icons	Action button background (hover)	Background color (hover)	background-color: rgb(218, 218, 218)	#DADADA	real-grey-200	#D1D0D0	Mapped to closest	
+Transactions	Transaction Card > Action Icons	Power Audit (lightning) icon	Icon color	fill: rgb(248, 76, 108)	#F84C6C	real-red-500	#F74D6B	Mapped to closest	
+Transactions	Transaction Card > Action Icons	Requires Attention (alert triangle) icon	Icon color	fill: rgb(248, 76, 108)	#F84C6C	real-red-500	#F74D6B	Mapped to closest	
+Transactions	Transaction Card > Action Icons	Compliance Verified (check) icon	Icon color	fill: rgb(67, 151, 117)	#439775	real-green-500	#439775	100% Match	
+Transactions	Transaction Card > Action Icons	Confirmed Commission Deposit ($) icon	Icon color	fill: rgb(67, 151, 117)	#439775	real-green-500	#439775	100% Match	
+Transactions	Transaction Card > Expanded Card Fields	Address text	Text color	color: rgb(29, 29, 29)	#1D1D1D	real-black	#1D1D1D	100% Match	
+Transactions	Transaction Card > Expanded Card Fields	TRANSACTION OWNER label	Text color	color: rgb(122, 132, 150)	#7A8496	real-grey-400	#888888	Mapped to closest	
+Transactions	Transaction Card > Expanded Card Fields	TRANSACTION OWNER & TEAM label	Text color	color: rgb(122, 132, 150)	#7A8496	real-grey-400	#888888	Mapped to closest	
+Transactions	Transaction Card > Expanded Card Fields	Transaction Owner value	Text color	color: rgb(29, 29, 29)	#1D1D1D	real-black	#1D1D1D	100% Match	
+Transactions	Transaction Card > Expanded Card Fields	REPRESENTING label	Text color	color: rgb(122, 132, 150)	#7A8496	real-grey-400	#888888	Mapped to closest	
+Transactions	Transaction Card > Expanded Card Fields	Representing value (Buy Side / Listing Side)	Text color	color: rgb(29, 29, 29)	#1D1D1D	real-black	#1D1D1D	100% Match	
+Transactions	Transaction Card > Expanded Card Fields	CLOSING DATE label	Text color	color: rgb(122, 132, 150)	#7A8496	real-grey-400	#888888	Mapped to closest	
+Transactions	Transaction Card > Expanded Card Fields	Closing Date value	Text color	color: rgb(29, 29, 29)	#1D1D1D	real-black	#1D1D1D	100% Match	
+Transactions	Transaction Card > Expanded Card Fields	SALE PRICE label	Text color	color: rgb(122, 132, 150)	#7A8496	real-grey-400	#888888	Mapped to closest	
+Transactions	Transaction Card > Expanded Card Fields	Sale Price value	Text color	color: rgb(29, 29, 29)	#1D1D1D	real-black	#1D1D1D	100% Match	
+Transactions	Transaction Card > Expanded Card Fields	BUYER label	Text color	color: rgb(122, 132, 150)	#7A8496	real-grey-400	#888888	Mapped to closest	
+Transactions	Transaction Card > Expanded Card Fields	Buyer name value	Text color	color: rgb(29, 29, 29)	#1D1D1D	real-black	#1D1D1D	100% Match	
+Transactions	Transaction Card > Expanded Card Fields	SELLER label	Text color	color: rgb(122, 132, 150)	#7A8496	real-grey-400	#888888	Mapped to closest	
+Transactions	Transaction Card > Expanded Card Fields	Seller name value	Text color	color: rgb(29, 29, 29)	#1D1D1D	real-black	#1D1D1D	100% Match	
+Transactions	Transaction Card > Expanded Card Fields	MONIES label	Text color	color: rgb(122, 132, 150)	#7A8496	real-grey-400	#888888	Mapped to closest	
+Transactions	Transaction Card > Expanded Card Fields	Gross Comm value (e.g. $10,700.01)	Text color	color: rgb(29, 29, 29)	#1D1D1D	real-black	#1D1D1D	100% Match	
+Transactions	Transaction Card > Expanded Card Fields	SYSTEM CLOSING DATE label	Text color	color: rgb(122, 132, 150)	#7A8496	real-grey-400	#888888	Mapped to closest	
+Transactions	Transaction Card > Expanded Card Fields	System Closing Date value	Text color	color: rgb(29, 29, 29)	#1D1D1D	real-black	#1D1D1D	100% Match	
+Transactions	Transaction Card > Expanded Card Fields	INVOICE label	Text color	color: rgb(122, 132, 150)	#7A8496	real-grey-400	#888888	Mapped to closest	
+Transactions	Transaction Card > Expanded Card Fields	Invoice value (e.g. INV-aJgthQf)	Text color	color: rgb(29, 29, 29)	#1D1D1D	real-black	#1D1D1D	100% Match	
+Transactions	Transaction Card > Expanded Card Fields	AGENTS label	Text color	color: rgb(122, 132, 150)	#7A8496	real-grey-400	#888888	Mapped to closest	
+Transactions	Transaction Card > Expanded Card Fields	FIRM DATE label	Text color	color: rgb(122, 132, 150)	#7A8496	real-grey-400	#888888	Mapped to closest	
+Transactions	Transaction Card > Expanded Card Fields	Firm Date value	Text color	color: rgb(29, 29, 29)	#1D1D1D	real-black	#1D1D1D	100% Match	
+Transactions	Transaction Card > Property Type Pill	Residential pill background	Background color	background-color: rgb(246, 245, 245)	#F6F5F5	real-grey-50	#F6F5F5	100% Match	All tabs
+Transactions	Transaction Card > Property Type Pill	Residential pill text	Text color	color: rgb(69, 69, 69)	#454545	real-grey-800	#454545	100% Match	All tabs
+Transactions	Transaction Card > Property Type Pill	Residential pill border	Border color	border-color: rgb(231, 230, 230)	#E7E6E6	real-grey-100	#E7E6E6	100% Match	All tabs
+Transactions	Transaction Card > Property Type Pill	Commercial pill background	Background color	background-color: rgb(237, 244, 255)	#EDF4FF	real-blue-50	#EDF4FF	100% Match	Most tabs (excluding Sale-Terminated, Lease-Terminated, Referrals tabs)
+Transactions	Transaction Card > Property Type Pill	Commercial pill text	Text color	color: rgb(38, 50, 173)	#2632AD	real-blue-800	#2632AD	100% Match	Most tabs (excluding Sale-Terminated, Lease-Terminated, Referrals tabs)
+Transactions	Transaction Card > Property Type Pill	Commercial pill border	Border color	border-color: rgb(221, 235, 255)	#DDEBFF	real-blue-100	#DDEBFF	100% Match	Most tabs (excluding Sale-Terminated, Lease-Terminated, Referrals tabs)
+Transactions	Transaction Card > Property Type Pill	Condo pill background	Background color	background-color: rgb(255, 251, 235)	#FFFBEB	amber-50	#FFFBEB	100% Match	Sale-Active, Lease-Active
+Transactions	Transaction Card > Property Type Pill	Condo pill text	Text color	color: rgb(146, 64, 14)	#92400E	amber-800	#92400E	100% Match	Sale-Active, Lease-Active
+Transactions	Transaction Card > Property Type Pill	Condo pill border	Border color	border-color: rgb(254, 243, 199)	#FEF3C7	amber-100	#FEF3C7	100% Match	Sale-Active, Lease-Active
+Transactions	Transaction Card > Property Type Pill	Mobile Home pill background	Background color	background-color: rgb(241, 248, 244)	#F1F8F4	real-green-50	#F1F8F4	100% Match	Lease-Closed
+Transactions	Transaction Card > Property Type Pill	Mobile Home pill text	Text color	color: rgb(30, 71, 56)	#1E4738	real-green-800	#1E4738	100% Match	Lease-Closed
+Transactions	Transaction Card > Property Type Pill	Mobile Home pill border	Border color	border-color: rgb(220, 239, 228)	#DCEFE4	real-green-100	#DCEFE4	100% Match	Lease-Closed
+Transactions	Transaction Card > Avatars	Purple avatar background	Background color	background-color: rgb(50, 18, 104)	#321268	real-blue-950	#171C4F	Mapped to closest	
+Transactions	Transaction Card > Avatars	Purple avatar text	Text color	color: rgb(255, 255, 255)	#FFFFFF	white	#FFFFFF	100% Match	
+Transactions	Transaction Card > Avatars	Teal/seaglass avatar background	Background color	background-color: rgb(191, 221, 219)	#BFDDDB	real-seaglass-200	#BFDDDB	100% Match	
+Transactions	Transaction Card > Avatars	Teal/seaglass avatar text	Text color	color: rgb(5, 14, 61)	#050E3D	Gray/900	#101828	Mapped to closest	
+Transactions	Transaction Card > Avatars	Avatar overflow (+N) background	Background color	background-color: rgb(218, 218, 218)	#DADADA	real-grey-200	#D1D0D0	Mapped to closest	
+Transactions	Transaction Card > Notification Badge	Notification badge background	Background color	background-color: rgb(248, 76, 108)	#F84C6C	real-red-500	#F74D6B	Mapped to closest	
+Transactions	Transaction Card > Notification Badge	Notification badge text	Text color	color: rgb(255, 255, 255)	#FFFFFF	white	#FFFFFF	100% Match	
+Transactions	Pagination	Sticky bar background	Background color	background-color: rgb(246, 248, 252)	#F6F8FC	real-seaglass-50	#F2F9F9	Mapped to closest	
+Transactions	Pagination	View label text	Text color	color: rgb(29, 29, 29)	#1D1D1D	real-black	#1D1D1D	100% Match	
+Transactions	Pagination	Row count text (of N transactions)	Text color	color: rgb(123, 122, 122)	#7B7A7A	real-grey-500	#767676	Mapped to closest	
+Transactions	Pagination	Page size select background	Background color	background-color: rgb(255, 255, 255)	#FFFFFF	white	#FFFFFF	100% Match	
+Transactions	Pagination	Page size select border	Border color	border-color: rgb(238, 238, 238)	#EEEEEE	real-green-50	#F1F8F4	Mapped to closest	
+Transactions	Pagination	Chevron icon	Icon color	fill: rgb(210, 213, 219)	#D2D5DB	real-grey-200	#D1D0D0	Mapped to closest	
+Transactions	Pagination	Page button text	Text color	color: rgb(68, 68, 68)	#444444	real-grey-800	#454545	Mapped to closest	
+Transactions	Pagination	Active page button background	Background color	background-color: rgb(237, 239, 243)	#EDEFF3	real-green-50	#F1F8F4	Mapped to closest	
+Transactions	Filters Modal	Panel background	Background color	background-color: rgb(255, 255, 255)	#FFFFFF	white	#FFFFFF	100% Match	
+Transactions	Filters Modal	Panel ring (around shadow)	Border color	border-color: rgb(228, 228, 231)	#E4E4E7	real-grey-100	#E7E6E6	Mapped to closest	
+Transactions	Filters Modal	Clear button background	Background color	background-color: rgb(255, 255, 255)	#FFFFFF	white	#FFFFFF	100% Match	
+Transactions	Filters Modal	Clear button text	Text color	color: rgb(29, 29, 29)	#1D1D1D	real-black	#1D1D1D	100% Match	
+Transactions	Filters Modal	Clear button border	Border color	border-color: rgb(29, 29, 29)	#1D1D1D	real-black	#1D1D1D	100% Match	
+Transactions	Filters Modal	Filters heading text	Text color	color: rgb(82, 82, 91)	#52525B	real-grey-700	#4F4F4F	Mapped to closest	
+Transactions	Filters Modal	Apply button background	Background color	background-color: rgb(73, 103, 253)	#4967FD	real-blue-500	#4967FD	100% Match	
+Transactions	Filters Modal	Apply button text	Text color	color: rgb(255, 255, 255)	#FFFFFF	white	#FFFFFF	100% Match	
+Transactions	Filters Modal	Filter row divider	Border color	border-color: rgb(228, 228, 231)	#E4E4E7	real-grey-100	#E7E6E6	Mapped to closest	
+Transactions	Filters Modal	Checkbox unchecked background	Background color	background-color: rgb(255, 255, 255)	#FFFFFF	white	#FFFFFF	100% Match	
+Transactions	Filters Modal	Checkbox checked background	Background color	background-color: rgb(59, 130, 246)	#3B82F6	real-blue-500	#4967FD	Mapped to closest	
+Transactions	Filters Modal	Checkbox ring	Border color	border-color: rgb(228, 228, 231)	#E4E4E7	real-grey-100	#E7E6E6	Mapped to closest	
+Transactions	Sort Dropdown	Panel background	Background color	background-color: rgb(255, 255, 255)	#FFFFFF	white	#FFFFFF	100% Match	
+Transactions	Sort Dropdown	Panel border	Border color	border-color: rgb(191, 195, 202)	#BFC3CA	real-grey-200	#D1D0D0	Mapped to closest	
+Transactions	Sort Dropdown	Header bottom border	Border color	border-color: rgb(218, 218, 218)	#DADADA	real-grey-200	#D1D0D0	Mapped to closest	
+Transactions	Sort Dropdown	SORT BY label	Text color	color: rgb(123, 122, 122)	#7B7A7A	real-grey-500	#767676	Mapped to closest	
+Transactions	Sort Dropdown	Selected option check icon	Icon color	color: rgb(73, 103, 253)	#4967FD	real-blue-500	#4967FD	100% Match	
+Transactions	Road to Success Popover (hover on ROAD TO SUCCESS)	Popover background	Background color	background-color: rgb(255, 255, 255)	#FFFFFF	white	#FFFFFF	100% Match	
+Transactions	Road to Success Popover (hover on ROAD TO SUCCESS)	Popover border	Border color	border-color: rgb(212, 212, 216)	#D4D4D8	real-grey-200	#D1D0D0	Mapped to closest	
+Transactions	Road to Success Popover (hover on ROAD TO SUCCESS)	Heading text	Text color	color: rgb(62, 63, 60)	#3E3F3C	real-grey-900	#3D3C3C	Mapped to closest	
+Transactions	Road to Success Popover (hover on ROAD TO SUCCESS)	Close (X) button background	Background color	background-color: rgb(178, 189, 198)	#B2BDC6	real-grey-300	#B0B0B0	Mapped to closest	
+Transactions	Road to Success Popover (hover on ROAD TO SUCCESS)	Close (X) button icon	Icon color	fill: rgb(255, 255, 255)	#FFFFFF	white	#FFFFFF	100% Match	
+Transactions	Road to Success Popover (hover on ROAD TO SUCCESS)	Vertical timeline connector	Background color	background-color: rgb(212, 212, 216)	#D4D4D8	real-grey-200	#D1D0D0	Mapped to closest	
+Transactions	Road to Success Popover (hover on ROAD TO SUCCESS)	Step circle background (completed)	Background color	background-color: rgb(228, 228, 231)	#E4E4E7	real-grey-100	#E7E6E6	Mapped to closest	
+Transactions	Road to Success Popover (hover on ROAD TO SUCCESS)	Step checkmark icon	Icon color	fill: rgb(32, 181, 117)	#20B575	real-green-500	#439775	Mapped to closest	
+Transactions	Road to Success Popover (hover on ROAD TO SUCCESS)	Date/timestamp text	Text color	color: rgb(113, 113, 122)	#71717A	real-grey-500	#767676	Mapped to closest	
+Transactions	Road to Success Popover (hover on ROAD TO SUCCESS)	Subtitle text (Marked as completed by ...)	Text color	color: rgb(113, 113, 122)	#71717A	real-grey-500	#767676	Mapped to closest	
+Transactions	Road to Success Popover (hover on ROAD TO SUCCESS)	Toggle switch (ON state)	Background color	background-color: rgb(5, 195, 249)	#05C3F9			Not in DS — needs add	
+Transactions	Road to Success Popover (hover on ROAD TO SUCCESS)	Toggle switch (OFF state)	Background color	background-color: rgb(228, 228, 231)	#E4E4E7	real-grey-100	#E7E6E6	Mapped to closest	
+Transactions	Road to Success Popover (hover on ROAD TO SUCCESS)	Toggle switch thumb	Background color	background-color: rgb(255, 255, 255)	#FFFFFF	white	#FFFFFF	100% Match	
+Transactions	Checklist Popover (hover on CHECKLIST)	Popover background	Background color	background-color: rgb(255, 255, 255)	#FFFFFF	white	#FFFFFF	100% Match	
+Transactions	Checklist Popover (hover on CHECKLIST)	Popover border	Border color	border-color: rgb(212, 212, 216)	#D4D4D8	real-grey-200	#D1D0D0	Mapped to closest	
+Transactions	Checklist Popover (hover on CHECKLIST)	Heading text	Text color	color: rgb(62, 63, 60)	#3E3F3C	real-grey-900	#3D3C3C	Mapped to closest	
+Transactions	Checklist Popover (hover on CHECKLIST)	Close (X) button background	Background color	background-color: rgb(178, 189, 198)	#B2BDC6	real-grey-300	#B0B0B0	Mapped to closest	
+Transactions	Checklist Popover (hover on CHECKLIST)	Item row divider	Border color	border-color: rgb(228, 228, 231)	#E4E4E7	real-grey-100	#E7E6E6	Mapped to closest	
+Transactions	Checklist Popover (hover on CHECKLIST)	Required label text	Text color	color: rgb(255, 97, 127)	#FF617F	real-red-400	#FF6E85	Mapped to closest	
+Transactions	Checklist Popover (hover on CHECKLIST)	Optional label text	Text color	color: rgb(62, 63, 60)	#3E3F3C	real-grey-900	#3D3C3C	Mapped to closest	
+Transactions	Checklist Popover (hover on CHECKLIST)	Due date text	Text color	color: rgb(161, 161, 170)	#A1A1AA	slate-400	#94A3B8	Mapped to closest	
+Transactions	Checklist Popover (hover on CHECKLIST)	Revision Requested badge background	Background color	background-color: rgb(254, 242, 245)	#FEF2F5	real-red-50	#FFF2F2	Mapped to closest	
+Transactions	Checklist Popover (hover on CHECKLIST)	Revision Requested badge text	Text color	color: rgb(248, 76, 108)	#F84C6C	real-red-500	#F74D6B	Mapped to closest	
+Transactions	Checklist Popover (hover on CHECKLIST)	Revision Requested badge icon	Icon color	fill: rgb(248, 76, 108)	#F84C6C	real-red-500	#F74D6B	Mapped to closest	
+Transactions	Checklist Popover (hover on CHECKLIST)	Accepted badge background	Background color	background-color: rgb(233, 248, 241)	#E9F8F1	real-green-50	#F1F8F4	Mapped to closest	
+Transactions	Checklist Popover (hover on CHECKLIST)	Accepted badge text	Text color	color: rgb(67, 151, 117)	#439775	real-green-500	#439775	100% Match	
+Transactions	Checklist Popover (hover on CHECKLIST)	Accepted badge icon	Icon color	fill: rgb(67, 151, 117)	#439775	real-green-500	#439775	100% Match	
+Transactions	Requires Attention Popover (hover on alert icon)	Popover background	Background color	background-color: rgb(255, 255, 255)	#FFFFFF	white	#FFFFFF	100% Match	
+Transactions	Requires Attention Popover (hover on alert icon)	Header bottom border	Border color	border-color: rgb(238, 238, 238)	#EEEEEE	real-green-50	#F1F8F4	Mapped to closest	
+Transactions	Requires Attention Popover (hover on alert icon)	Alert icon	Icon color	fill: rgb(248, 76, 108)	#F84C6C	real-red-500	#F74D6B	Mapped to closest	
+Transactions	Requires Attention Popover (hover on alert icon)	Heading text	Text color	color: rgb(29, 29, 29)	#1D1D1D	real-black	#1D1D1D	100% Match	
+Transactions	Requires Attention Popover (hover on alert icon)	Body text	Text color	color: rgb(29, 29, 29)	#1D1D1D	real-black	#1D1D1D	100% Match	
+Transactions	Compliance Verified Tooltip (hover on green check)	Tooltip background	Background color	background-color: rgb(255, 255, 255)	#FFFFFF	white	#FFFFFF	100% Match	
+Transactions	Compliance Verified Tooltip (hover on green check)	Tooltip border	Border color	border-color: rgb(29, 29, 29)	#1D1D1D	real-black	#1D1D1D	100% Match	
+Transactions	Compliance Verified Tooltip (hover on green check)	Tooltip text	Text color	color: rgb(0, 0, 0)	#000000	black	#000000	100% Match	
+Transactions	Power Audit Tooltip (hover on lightning icon)	Tooltip background	Background color	background-color: rgb(255, 255, 255)	#FFFFFF	white	#FFFFFF	100% Match	
+Transactions	Power Audit Tooltip (hover on lightning icon)	Tooltip border	Border color	border-color: rgb(29, 29, 29)	#1D1D1D	real-black	#1D1D1D	100% Match	
+Transactions	Power Audit Tooltip (hover on lightning icon)	Tooltip text	Text color	color: rgb(29, 29, 29)	#1D1D1D	real-black	#1D1D1D	100% Match	
+Transactions	Hover States (generic)	Generic button hover bg (variant A)	Background color (hover)	background-color: rgb(248, 248, 248)	#F8F8F8	real-grey-50	#F6F5F5	Mapped to closest	
+Transactions	Hover States (generic)	Pagination button hover bg	Background color (hover)	background-color: rgb(246, 248, 252)	#F6F8FC	real-seaglass-50	#F2F9F9	Mapped to closest	
