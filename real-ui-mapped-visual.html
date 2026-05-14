@@ -5438,15 +5438,23 @@ body {
 }
 
 .side-labels {
-  display: flex; justify-content: space-between;
-  padding: 12px 20px;
-  background: #F6F5F5;
+  display: flex;
+  padding: 16px 24px;
+  background: #fff;
   border-bottom: 1px solid #E7E6E6;
-  font-size: 11px; font-weight: 700;
-  letter-spacing: 0.06em; text-transform: uppercase;
+  font-size: 15px; font-weight: 700;
+  color: #1D1D1D;
+  position: relative;
 }
-.side-labels .label-before { color: #1D1D1D; }
-.side-labels .label-after { color: #1D1D1D; }
+.side-labels .label-before {
+  width: 50%;
+  text-align: left;
+}
+.side-labels .label-after {
+  width: 50%;
+  text-align: left;
+  padding-left: 8px;
+}
 
 .stage {
   position: relative;
@@ -6064,15 +6072,10 @@ body.real-ui-mapped path[fill="#F84C6C"] {
 </div>
 
 <div class="controls">
-  <div class="toggle-row">
-    <span class="toggle-label">Toggle</span>
-    <div class="toggle-group">
-      <button id="btn-current" class="toggle-btn active" onclick="setMode('current')">Current (on Play)</button>
-      <button id="btn-mapped" class="toggle-btn" onclick="setMode('mapped')">REAL UI Mapped</button>
-    </div>
+  <div class="toggle-group">
+    <button id="btn-current" class="toggle-btn active" onclick="setMode('current')">Current (on Play)</button>
+    <button id="btn-mapped" class="toggle-btn" onclick="setMode('mapped')">REAL UI Mapped</button>
   </div>
-  <div class="or-divider">OR</div>
-  <div class="drag-hint">Drag to see changes</div>
 </div>
 
 <div class="comparison">
