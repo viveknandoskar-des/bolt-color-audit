@@ -5528,7 +5528,7 @@ html.dragging .divider-line {
   position: absolute; top: 0; bottom: 0;
   left: var(--slider-pos);
   width: 3px;
-  z-index: 100;
+  z-index: 300; /* above .divider-line (200) so the handle stays on top */
   transform: translateX(-50%);
   transition: left 0.4s var(--easing);
   pointer-events: none;
