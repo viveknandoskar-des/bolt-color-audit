@@ -5408,6 +5408,18 @@ body:not(.real-ui-mapped) .audit-banner {
 /* Body needs font-primary-regular to inherit Bolt fonts */
 body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Poppins', sans-serif; margin: 0; }
 
+/* Static visual: links don't navigate, but keep visual styling */
+.audit-content a,
+.audit-content button,
+.audit-content [role="button"],
+.audit-content input {
+  cursor: default !important;
+}
+.audit-content a:hover,
+.audit-content a:focus {
+  text-decoration: inherit !important;
+}
+
 
 /* ============================================================ */
 /* Real UI Mapping Overrides (applied when body has .real-ui-mapped) */
@@ -5975,6 +5987,19 @@ body.real-ui-mapped path[fill="#F84C6C"] {
 </div>
 
 <script>
+// Disable all clicks/navigation inside the captured page (it's a static visual)
+document.addEventListener('click', (e) => {
+  const auditContent = document.querySelector('.audit-content');
+  if (auditContent && auditContent.contains(e.target)) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+}, true);
+document.addEventListener('submit', (e) => {
+  const auditContent = document.querySelector('.audit-content');
+  if (auditContent && auditContent.contains(e.target)) e.preventDefault();
+}, true);
+
 function setMode(mode) {
   const body = document.body;
   const banner = document.getElementById('banner');
