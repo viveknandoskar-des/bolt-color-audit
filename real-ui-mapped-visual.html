@@ -5425,13 +5425,18 @@ body {
 /* COMPARISON STAGE */
 .comparison {
   position: relative;
-  margin: 0 24px 32px;
+  width: 1000px;
+  max-width: calc(100% - 48px);
+  height: 1024px;
+  margin: 0 auto 32px;
   background: #fff;
   border: 2px solid #E7E6E6;
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.06);
   animation: rise 0.7s var(--easing) 0.1s both;
+  display: flex;
+  flex-direction: column;
 }
 @keyframes rise {
   from { opacity: 0; transform: translateY(16px); }
@@ -5499,6 +5504,8 @@ html.dragging .divider-line {
 .stage {
   position: relative;
   user-select: none;
+  flex: 1;
+  overflow: hidden;
 }
 .stage-layer {
   width: 100%;
