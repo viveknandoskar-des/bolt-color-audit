@@ -5444,18 +5444,30 @@ body {
   color: #1D1D1D;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  overflow: hidden;
+}
+.side-labels .label-before,
+.side-labels .label-after {
+  padding: 14px 24px;
+  text-align: center;
+  overflow: hidden;
+  white-space: nowrap;
+  box-sizing: border-box;
+  transition: width 0.4s var(--easing);
 }
 .side-labels .label-before {
-  width: 50%;
-  padding: 14px 24px;
+  width: var(--slider-pos);
   background: #FCEDEC;
-  text-align: center;
 }
 .side-labels .label-after {
-  width: 50%;
-  padding: 14px 24px;
+  width: calc(100% - var(--slider-pos));
   background: #ECF5EF;
-  text-align: center;
+}
+html.dragging .label-before,
+html.dragging .label-after,
+html.dragging .stage-layer.after,
+html.dragging .divider {
+  transition: none !important;
 }
 
 .stage {
@@ -6124,8 +6136,13 @@ let dragging = false;
 
 function setSlider(pct, animate = true) {
   pct = Math.max(0, Math.min(100, pct));
-  if (animate) stage.classList.remove('dragging');
-  else stage.classList.add('dragging');
+  if (animate) {
+    stage.classList.remove('dragging');
+    document.documentElement.classList.remove('dragging');
+  } else {
+    stage.classList.add('dragging');
+    document.documentElement.classList.add('dragging');
+  }
   document.documentElement.style.setProperty('--slider-pos', pct + '%');
 }
 
