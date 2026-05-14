@@ -5408,17 +5408,7 @@ body:not(.real-ui-mapped) .audit-banner {
 /* Body needs font-primary-regular to inherit Bolt fonts */
 body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Poppins', sans-serif; margin: 0; }
 
-/* Static visual: links don't navigate, but keep visual styling */
-.audit-content a,
-.audit-content button,
-.audit-content [role="button"],
-.audit-content input {
-  cursor: default !important;
-}
-.audit-content a:hover,
-.audit-content a:focus {
-  text-decoration: inherit !important;
-}
+/* Static visual: clicks blocked via JS but cursor/hover styles preserved so it feels real */
 
 
 /* ============================================================ */
