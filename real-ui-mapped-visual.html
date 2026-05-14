@@ -5483,10 +5483,10 @@ body {
   transition: none;
 }
 .divider-handle {
-  /* sticky so it stays vertically centered in the viewport as user scrolls the demo */
-  position: sticky;
-  top: 50vh;
-  margin-top: 0;
+  /* Y position tracked by JS to follow mouse; defaults to middle */
+  position: absolute;
+  top: 50%;
+  left: 0;
   width: 48px; height: 48px;
   background: white;
   border: 2px solid #1D1D1D;
@@ -5496,9 +5496,12 @@ body {
   pointer-events: auto;
   display: flex; align-items: center; justify-content: center;
   font-size: 20px; font-weight: bold; color: #1D1D1D;
-  /* center horizontally over the line + vertically over its own top */
   transform: translate(-50%, -50%);
   margin-left: 1.5px;
+  transition: transform 0.2s var(--easing), top 0.35s var(--easing);
+}
+/* Tracking mouse: no Y animation (instant follow) */
+.stage.tracking .divider-handle {
   transition: transform 0.2s var(--easing);
 }
 .divider-handle:hover {
@@ -6126,6 +6129,29 @@ function onMove(clientX) {
   const pct = ((clientX - r.left) / r.width) * 100;
   setSlider(pct, false);
 }
+
+// --- Handle Y tracks mouse over stage; returns to middle when mouse leaves ---
+function setHandleY(pct, instant) {
+  pct = Math.max(0, Math.min(100, pct));
+  handle.style.top = pct + '%';
+  if (instant) stage.classList.add('tracking');
+  else stage.classList.remove('tracking');
+}
+stage.addEventListener('mousemove', (e) => {
+  const r = stage.getBoundingClientRect();
+  const yPct = ((e.clientY - r.top) / r.height) * 100;
+  setHandleY(yPct, true);
+  if (dragging) onMove(e.clientX);
+});
+stage.addEventListener('mouseleave', () => {
+  if (!dragging) setHandleY(50, false); // animate back to middle
+});
+stage.addEventListener('mouseenter', (e) => {
+  // instant catch-up to current mouse position on entry
+  const r = stage.getBoundingClientRect();
+  const yPct = ((e.clientY - r.top) / r.height) * 100;
+  setHandleY(yPct, true);
+});
 
 handle.addEventListener('mousedown', (e) => {
   dragging = true;
