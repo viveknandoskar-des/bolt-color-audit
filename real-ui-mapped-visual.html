@@ -5444,29 +5444,15 @@ body {
   color: #1D1D1D;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  overflow: hidden;
 }
 .side-labels .label-before,
 .side-labels .label-after {
+  width: 50%;
   padding: 14px 24px;
   text-align: center;
-  overflow: hidden;
-  white-space: nowrap;
-  box-sizing: border-box;
-  transition: width 0.4s var(--easing);
 }
-.side-labels .label-before {
-  width: var(--slider-pos);
-  background: #FCEDEC;
-}
-.side-labels .label-after {
-  width: calc(100% - var(--slider-pos));
-  background: #ECF5EF;
-}
-html.dragging .label-before,
-html.dragging .label-after {
-  transition: none !important;
-}
+.side-labels .label-before { background: #FCEDEC; }
+.side-labels .label-after { background: #ECF5EF; }
 
 .stage {
   position: relative;
