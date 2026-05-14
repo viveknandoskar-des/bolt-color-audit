@@ -5580,6 +5580,13 @@ html.dragging .divider-line {
   margin-bottom: 16px !important;
 }
 
+/* Pagination row peeks under the last card by ~half */
+.stage-layer [data-pagination-row] {
+  margin-top: -120px !important;
+  position: relative;
+  z-index: 5;
+}
+
 
 /* ============================================================ */
 /* Real UI mapping overrides (applied via .real-ui-mapped class) */
