@@ -5426,10 +5426,10 @@ body {
 .comparison {
   margin: 0 24px 32px;
   background: #fff;
-  border: 1px solid #E7E6E6;
+  border: 2px solid #4967FD;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 24px -8px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 24px -8px rgba(73, 103, 253, 0.15);
   animation: rise 0.7s var(--easing) 0.1s both;
 }
 @keyframes rise {
@@ -5439,21 +5439,23 @@ body {
 
 .side-labels {
   display: flex;
-  padding: 16px 24px;
-  background: #fff;
   border-bottom: 1px solid #E7E6E6;
-  font-size: 15px; font-weight: 700;
+  font-size: 13px; font-weight: 700;
   color: #1D1D1D;
-  position: relative;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 .side-labels .label-before {
   width: 50%;
-  text-align: left;
+  padding: 14px 24px;
+  background: #FCEDEC;
+  text-align: center;
 }
 .side-labels .label-after {
   width: 50%;
-  text-align: left;
-  padding-left: 8px;
+  padding: 14px 24px;
+  background: #ECF5EF;
+  text-align: center;
 }
 
 .stage {
@@ -6080,8 +6082,8 @@ body.real-ui-mapped path[fill="#F84C6C"] {
 
 <div class="comparison">
   <div class="side-labels">
-    <span class="label-before">Before</span>
-    <span class="label-after">After</span>
+    <span class="label-before">Current (on Play)</span>
+    <span class="label-after">New (Real UI Mapped)</span>
   </div>
   <div class="stage" id="stage">
     <div class="stage-layer before">
