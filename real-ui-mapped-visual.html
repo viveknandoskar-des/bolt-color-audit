@@ -5410,6 +5410,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Poppins', sans-
 
 /* Static visual: clicks blocked via JS but cursor/hover styles preserved so it feels real */
 
+/* Force margin between transaction cards (HTML structure has divs inside tbody which
+   the browser auto-corrects, breaking the parent's space-y-4 spacing) */
+.audit-content [class*="rounded-[10px]"] {
+  margin-bottom: 16px !important;
+}
+
 
 /* ============================================================ */
 /* Real UI Mapping Overrides (applied when body has .real-ui-mapped) */
