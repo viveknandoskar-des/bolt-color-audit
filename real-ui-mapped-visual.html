@@ -5439,21 +5439,45 @@ body {
 }
 
 .side-labels {
-  display: flex;
+  position: relative;
+  height: 50px;
   border-bottom: 1px solid #E7E6E6;
   font-size: 13px; font-weight: 700;
   color: #1D1D1D;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  overflow: hidden;
 }
+/* Resizing color bands underneath */
+.side-labels .band {
+  position: absolute;
+  top: 0; bottom: 0;
+  transition: left 0.4s var(--easing), width 0.4s var(--easing), right 0.4s var(--easing);
+}
+.side-labels .band-before {
+  left: 0;
+  width: var(--slider-pos);
+  background: #FCEDEC;
+}
+.side-labels .band-after {
+  left: var(--slider-pos);
+  right: 0;
+  background: #ECF5EF;
+}
+html.dragging .side-labels .band {
+  transition: none;
+}
+/* Text labels — fixed in position */
 .side-labels .label-before,
 .side-labels .label-after {
-  width: 50%;
-  padding: 14px 24px;
-  text-align: center;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  z-index: 1;
 }
-.side-labels .label-before { background: #FCEDEC; }
-.side-labels .label-after { background: #ECF5EF; }
+.side-labels .label-before { left: 25%; }
+.side-labels .label-after { left: 75%; }
 
 /* divider line spans the FULL comparison (including the headers) */
 .divider-line {
@@ -6095,6 +6119,8 @@ body.real-ui-mapped path[fill="#F84C6C"] {
 
 <div class="comparison">
   <div class="side-labels">
+    <div class="band band-before"></div>
+    <div class="band band-after"></div>
     <span class="label-before">Current (on Play)</span>
     <span class="label-after">New (Real UI Mapped)</span>
   </div>
