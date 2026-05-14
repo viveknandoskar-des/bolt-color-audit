@@ -5580,7 +5580,12 @@ html.dragging .divider-line {
   margin-bottom: 16px !important;
 }
 
-/* Pagination row stays in flow with subtle top shadow (peeks up over the cards above) */
+/* Collapse the page-content wrapper's min-height so pagination sits right after the cards */
+.stage-layer [class*="min-h-[calc(100vh"] {
+  min-height: 0 !important;
+}
+
+/* Pagination row stays in flow with subtle top shadow */
 .stage-layer [data-pagination-row] {
   position: relative;
   z-index: 5;
