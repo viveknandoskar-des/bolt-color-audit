@@ -10,8 +10,8 @@
     --text: #1D1D1D;
     --muted: #767676;
     --border: #E7E6E6;
-    --before-bg: #FFF8F8;
-    --after-bg: #F4FBF7;
+    --before-bg: #FFFFFF;
+    --after-bg: #FFFFFF;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
@@ -63,8 +63,8 @@
     display: inline-block; width: 14px; height: 14px; border-radius: 3px;
     border: 1px solid rgba(0,0,0,0.1); vertical-align: middle; margin-right: 6px;
   }
-  .legend .chip.before { background: var(--before-bg); }
-  .legend .chip.after { background: var(--after-bg); }
+  .legend .chip.before { background: #FFE8E8; }
+  .legend .chip.after { background: #DCEFE4; }
 
   /* Section card */
   section.comp {
@@ -95,12 +95,22 @@
   .compare .before-pane { background: var(--before-bg); border-right: 1px solid var(--border); }
   .compare .after-pane { background: var(--after-bg); }
   .compare h3 {
-    margin: 0 0 12px;
+    display: inline-block;
+    margin: 0 0 14px;
+    padding: 4px 12px;
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: var(--muted);
     font-weight: 600;
+    border-radius: 999px;
+  }
+  .compare .before-pane h3 {
+    background: #FFE8E8;
+    color: #B91C1C;
+  }
+  .compare .after-pane h3 {
+    background: #DCEFE4;
+    color: #1E4738;
   }
   .changes {
     margin-top: 14px;
@@ -541,6 +551,7 @@
   <div class="legend">
     <span><span class="chip before"></span>Before — current colors on play</span>
     <span><span class="chip after"></span>After — mapped to Real UI 2025</span>
+    <span style="margin-left:auto;font-size:11px;">Note: panes use white backgrounds for accurate color reading</span>
   </div>
 </div>
 
